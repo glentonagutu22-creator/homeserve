@@ -2,11 +2,11 @@
 
 import {
   FormEvent,
+  Suspense,
   useEffect,
   useState,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import {
   Address,
   CreateAddressData,
@@ -24,7 +24,7 @@ const emptyForm: CreateAddressData = {
   county: "",
 };
 
-export default function AddressesPage() {
+function AddressesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -219,98 +219,72 @@ export default function AddressesPage() {
       <main className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
 
-          {/* =====================================================
-              HEADER
-          ===================================================== */}
+          {/* Header */}
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                My Addresses
+              </h1>
 
-          <div className="mb-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Customer Account
-                </p>
-
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#061F35] sm:text-3xl">
-                  My Addresses
-                </h1>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                  Save the locations where you need
-                  HomeServe services. Your saved addresses
-                  can be selected when making a booking.
-                </p>
-              </div>
-
-              {returnTo && (
-                <button
-                  type="button"
-                  onClick={handleBackToBooking}
-                  className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600"
-                >
-                  <span>←</span>
-                  Back to booking
-                </button>
-              )}
-
+              <p className="mt-1 text-sm text-slate-500">
+                Manage the addresses you use for your
+                HomeServe bookings.
+              </p>
             </div>
 
-            {/* Booking context */}
             {returnTo && (
-              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-                <p className="text-sm text-blue-800">
-                  Add your service address below and
-                  you'll automatically return to your
-                  booking.
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={handleBackToBooking}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Back to Booking
+              </button>
             )}
           </div>
 
-          {/* =====================================================
-              CONTENT
-          ===================================================== */}
+          {/* Alerts */}
+          {error && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-          <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+          {success && (
+            <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+              {success}
+            </div>
+          )}
 
-            {/* =================================================
-                ADDRESS FORM
-            ================================================= */}
+          {/* Address Form */}
+          <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-slate-900">
+                {editingId
+                  ? "Edit Address"
+                  : "Add New Address"}
+              </h2>
 
-            <section className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <p className="mt-1 text-sm text-slate-500">
+                {editingId
+                  ? "Update your address details below."
+                  : "Add an address where HomeServe can provide your service."}
+              </p>
+            </div>
 
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
-                  {editingId
-                    ? "Edit Address"
-                    : "New Address"}
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-[#061F35] sm:text-2xl">
-                  {editingId
-                    ? "Update your address"
-                    : "Add an address"}
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  {editingId
-                    ? "Update the details of your saved service location."
-                    : "Save a location for faster and easier bookings."}
-                </p>
-              </div>
-
-              <form
-                onSubmit={handleSubmit}
-                className="mt-6 space-y-4"
-              >
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
+            >
+              <div className="grid gap-5 md:grid-cols-2">
 
                 {/* Label */}
                 <div>
                   <label
                     htmlFor="label"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-2 block text-sm font-medium text-slate-700"
                   >
-                    Label
+                    Address Label
                   </label>
 
                   <input
@@ -323,17 +297,17 @@ export default function AddressesPage() {
                         event.target.value
                       )
                     }
-                    placeholder="e.g. Home"
+                    placeholder="e.g. Home, Office"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
-                {/* Address */}
+                {/* Address Line */}
                 <div>
                   <label
                     htmlFor="addressLine"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-2 block text-sm font-medium text-slate-700"
                   >
                     Address
                   </label>
@@ -348,9 +322,9 @@ export default function AddressesPage() {
                         event.target.value
                       )
                     }
-                    placeholder="Street, building or estate"
+                    placeholder="e.g. P.O. Box 123, Main Street"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
@@ -358,7 +332,7 @@ export default function AddressesPage() {
                 <div>
                   <label
                     htmlFor="city"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-2 block text-sm font-medium text-slate-700"
                   >
                     City / Town
                   </label>
@@ -373,9 +347,9 @@ export default function AddressesPage() {
                         event.target.value
                       )
                     }
-                    placeholder="e.g. Chuka"
+                    placeholder="e.g. Nairobi"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
@@ -383,7 +357,7 @@ export default function AddressesPage() {
                 <div>
                   <label
                     htmlFor="county"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-2 block text-sm font-medium text-slate-700"
                   >
                     County
                   </label>
@@ -398,184 +372,248 @@ export default function AddressesPage() {
                         event.target.value
                       )
                     }
-                    placeholder="e.g. Tharaka-Nithi"
+                    placeholder="e.g. Nairobi County"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
-                {/* Messages */}
-                {error && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {error}
-                  </div>
-                )}
-
-                {success && (
-                  <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                    {success}
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {saving
-                      ? "Saving..."
-                      : editingId
-                        ? "Update Address"
-                        : "Add Address"}
-                  </button>
-
-                  {editingId && (
-                    <button
-                      type="button"
-                      onClick={cancelEditing}
-                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
-                    >
-                      Cancel
-                    </button>
-                  )}
-
-                </div>
-              </form>
-            </section>
-
-            {/* =================================================
-                SAVED ADDRESSES
-            ================================================= */}
-
-            <section>
-
-              <div className="flex items-end justify-between gap-4">
+                {/* Latitude */}
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
-                    Saved Locations
-                  </p>
+                  <label
+                    htmlFor="latitude"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Latitude
+                    <span className="ml-1 text-xs text-slate-400">
+                      (optional)
+                    </span>
+                  </label>
 
-                  <h2 className="mt-2 text-xl font-bold text-[#061F35] sm:text-2xl">
-                    Your addresses
-                  </h2>
+                  <input
+                    id="latitude"
+                    type="number"
+                    step="any"
+                    value={
+                      form.latitude ?? ""
+                    }
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        latitude:
+                          event.target.value
+                            ? Number(
+                                event.target.value
+                              )
+                            : undefined,
+                      }))
+                    }
+                    placeholder="-1.286389"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
                 </div>
 
-                <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                  {addresses.length}{" "}
-                  {addresses.length === 1
-                    ? "address"
-                    : "addresses"}
-                </span>
+                {/* Longitude */}
+                <div>
+                  <label
+                    htmlFor="longitude"
+                    className="mb-2 block text-sm font-medium text-slate-700"
+                  >
+                    Longitude
+                    <span className="ml-1 text-xs text-slate-400">
+                      (optional)
+                    </span>
+                  </label>
+
+                  <input
+                    id="longitude"
+                    type="number"
+                    step="any"
+                    value={
+                      form.longitude ?? ""
+                    }
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        longitude:
+                          event.target.value
+                            ? Number(
+                                event.target.value
+                              )
+                            : undefined,
+                      }))
+                    }
+                    placeholder="36.817223"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
               </div>
 
-              {/* Loading */}
-              {loading ? (
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-                  <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+              {/* Form Actions */}
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving
+                    ? "Saving..."
+                    : editingId
+                      ? "Update Address"
+                      : "Add Address"}
+                </button>
 
-                  <p className="text-sm text-slate-500">
-                    Loading your addresses...
-                  </p>
-                </div>
-              ) : addresses.length === 0 ? (
-                /* Empty */
-                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm sm:p-10">
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    disabled={saving}
+                    className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </section>
 
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl font-bold text-blue-600">
-                    +
-                  </div>
+          {/* Saved Addresses */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Saved Addresses
+              </h2>
 
-                  <h3 className="mt-5 text-lg font-bold text-[#061F35]">
-                    No saved addresses
-                  </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Your saved service locations.
+              </p>
+            </div>
 
-                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                    Add your first service location
-                    using the form.
-                  </p>
+            {loading ? (
+              <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+                <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
 
-                </div>
-              ) : (
-                /* Address cards */
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <p className="text-sm text-slate-500">
+                  Loading addresses...
+                </p>
+              </div>
+            ) : addresses.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+                <h3 className="text-base font-semibold text-slate-900">
+                  No saved addresses
+                </h3>
 
-                  {addresses.map((address) => (
-                    <article
-                      key={address.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
-                    >
+                <p className="mt-2 text-sm text-slate-500">
+                  Add your first address above to use
+                  it when booking a HomeServe service.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-5 md:grid-cols-2">
+                {addresses.map((address) => (
+                  <article
+                    key={address.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold text-slate-900">
+                          {address.label}
+                        </h3>
 
-                      {/* Card header */}
-                      <div className="flex items-start gap-3">
-
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-lg text-blue-600">
-                          ⌂
-                        </div>
-
-                        <div className="min-w-0">
-                          <h3 className="truncate font-bold text-[#061F35]">
-                            {address.label}
-                          </h3>
-
-                          <p className="mt-0.5 text-xs text-slate-400">
-                            Service location
-                          </p>
-                        </div>
-
-                      </div>
-
-                      {/* Address */}
-                      <div className="mt-5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                        <p>{address.addressLine}</p>
-
-                        <p>
-                          {address.city},{" "}
-                          {address.county}
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {address.addressLine}
+                          <br />
+                          {address.city}
+                          {address.county
+                            ? `, ${address.county}`
+                            : ""}
                         </p>
                       </div>
+                    </div>
 
-                      {/* Actions */}
-                      <div className="mt-4 flex gap-2">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            startEditing(address)
-                          }
-                          className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(address.id)
-                          }
-                          disabled={
-                            deletingId === address.id
-                          }
-                          className="flex-1 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {deletingId === address.id
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
-
+                    {(address.latitude !== null &&
+                      address.latitude !== undefined) ||
+                    (address.longitude !== null &&
+                      address.longitude !== undefined) ? (
+                      <div className="mt-3 text-xs text-slate-400">
+                        Coordinates:{" "}
+                        {address.latitude ?? "—"},{" "}
+                        {address.longitude ?? "—"}
                       </div>
-                    </article>
-                  ))}
+                    ) : null}
 
-                </div>
-              )}
+                    <div className="mt-5 flex flex-wrap gap-3 border-t border-slate-100 pt-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          startEditing(address)
+                        }
+                        className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Edit
+                      </button>
 
-            </section>
-          </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDelete(address.id)
+                        }
+                        disabled={
+                          deletingId === address.id
+                        }
+                        className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {deletingId === address.id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+
+                      {returnTo && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              `${returnTo}${returnTo.includes("?") ? "&" : "?"}addressId=${address.id}`
+                            )
+                          }
+                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                        >
+                          Use This Address
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       </main>
     </DashboardShell>
+  );
+}
+
+export default function AddressesPage() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardShell>
+          <main className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-6xl">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+                <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+
+                <p className="text-sm text-slate-500">
+                  Loading addresses...
+                </p>
+              </div>
+            </div>
+          </main>
+        </DashboardShell>
+      }
+    >
+      <AddressesContent />
+    </Suspense>
   );
 }
