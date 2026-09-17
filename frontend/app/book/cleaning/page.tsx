@@ -1,0 +1,163 @@
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import BookingForm from "@/components/BookingForm";
+import { getServicesByCategory } from "@/lib/services";
+import type { Service } from "@/types/service";
+import DashboardShell from "@/components/dashboard/DashboardShell";
+
+function CleaningBookingContent() {
+  const searchParams = useSearchParams();
+  const serviceId = searchParams.get("service");
+
+  const [service, setService] =
+    useState<Service | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadService() {
+      if (!serviceId) {
+        setError("No cleaning service was selected.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const services =
+          await getServicesByCategory("cleaning");
+
+        const selectedService = services.find(
+          (item) => item.id === serviceId
+        );
+
+        if (!selectedService) {
+          setError(
+            "The selected cleaning service was not found."
+          );
+          setLoading(false);
+          return;
+        }
+
+        setService(selectedService);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load the cleaning service."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadService();
+  }, [serviceId]);
+
+  if (loading) {
+    return (
+      <DashboardShell>
+        <div className="flex min-h-full items-center justify-center bg-slate-50 px-4">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+
+            <p className="text-sm text-slate-600">
+              Loading booking...
+            </p>
+          </div>
+        </div>
+      </DashboardShell>
+    );
+  }
+
+  if (error || !service) {
+    return (
+      <DashboardShell>
+        <div className="flex min-h-full items-center justify-center bg-slate-50 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-xl text-red-600">
+              !
+            </div>
+
+            <h1 className="mt-5 text-xl font-bold text-[#061F35]">
+              Unable to load booking
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              {error ||
+                "The selected service could not be found."}
+            </p>
+          </div>
+        </div>
+      </DashboardShell>
+    );
+  }
+
+  /*
+   * Preserve the selected service when the customer
+   * temporarily leaves this page to add an address.
+   */
+  const returnTo = `/book/cleaning?service=${encodeURIComponent(
+    service.id
+  )}`;
+
+  return (
+    <DashboardShell>
+      <div className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+
+          {/* Page header */}
+          <div className="mb-6">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
+              Cleaning Services
+            </p>
+
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#061F35] sm:text-3xl">
+              Book a Cleaning Service
+            </h1>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
+              Tell us what you need and choose a
+              convenient date and location for your
+              cleaning service.
+            </p>
+          </div>
+
+          <BookingForm
+            category="cleaning"
+            service={service}
+            returnTo={returnTo}
+          />
+
+        </div>
+      </div>
+    </DashboardShell>
+  );
+}
+
+export default function CleaningBookingPage() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardShell>
+          <div className="flex min-h-full items-center justify-center bg-slate-50 px-4">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+
+              <p className="text-sm text-slate-600">
+                Loading booking...
+              </p>
+            </div>
+          </div>
+        </DashboardShell>
+      }
+    >
+      <CleaningBookingContent />
+    </Suspense>
+  );
+}

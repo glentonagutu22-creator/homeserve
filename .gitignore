@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Next.js
+.next/
+**/.next/
+
+# Build output
+dist/
+**/dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Prisma
+prisma/.cache/
+
+# Uploaded/generated files
+uploads/
+**/uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local database backups
+*.dump
+*.sql
+*.backup
+
+# Testing/coverage
+coverage/
+
+# AI / editor-specific instructions
+**/.agents/
+**/.claude/
+**/.windsurf/
+
+# Temporary integration test scripts
+backend/test-sms-status.cjs
+# Generated Prisma Client
+backend/src/generated/prisma/
+# AI/editor instruction files
+**/AGENTS.md
+**/CLAUDE.md
