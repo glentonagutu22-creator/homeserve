@@ -1,24 +1,25 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import {
+  FormEvent,
+  Suspense,
+  useState,
+} from "react";
+
 import Link from "next/link";
+
 import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+
 import AuthLayout from "@/components/AuthLayout";
 import GoogleButton from "@/components/GoogleButton";
-import { loginUser } from "@/lib/auth";
-import { apiRequest } from "@/lib/api";
-import type { LoginResponse } from "@/types/auth";
+import { useAuth } from "@/components/AuthProvider";
 
-function LoginContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+import type { LoginData } from "@/types/auth";
 
-  const redirect =
-    searchParams.get("redirect") || "/dashboard";
-    function getDashboardPath(
+function getDashboardPath(
   role: "CUSTOMER" | "STAFF" | "ADMIN"
 ) {
   switch (role) {
@@ -33,13 +34,27 @@ function LoginContent() {
   }
 }
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+function LoginContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { login, googleLogin } = useAuth();
+
+  const redirect =
+    searchParams.get("redirect") ||
+    "/dashboard";
+
+  const [form, setForm] =
+    useState<LoginData>({
+      email: "",
+      password: "",
+    });
+
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>
@@ -59,16 +74,24 @@ function LoginContent() {
     setLoading(true);
 
     try {
-    const response = await loginUser(form);
+      /*
+       * IMPORTANT:
+       *
+       * Use AuthProvider.login() instead of
+       * calling loginUser() directly.
+       *
+       * AuthProvider.login() performs the
+       * backend login AND updates the global
+       * authentication state.
+       */
+      const user = await login(form);
 
-const destination =
-  redirect !== "/dashboard"
-    ? redirect
-    : getDashboardPath(
-        response.user.role
-      );
+      const destination =
+        redirect !== "/dashboard"
+          ? redirect
+          : getDashboardPath(user.role);
 
-router.push(destination);
+      router.push(destination);
     } catch (error) {
       setError(
         error instanceof Error
@@ -87,25 +110,20 @@ router.push(destination);
     setLoading(true);
 
     try {
-     const response =
-  await apiRequest<LoginResponse>(
-    "/auth/google",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        credential,
-      }),
-    }
-  );
+      /*
+       * Use AuthProvider.googleLogin()
+       * so the global authentication state
+       * is updated after Google authentication.
+       */
+      const user =
+        await googleLogin(credential);
 
-const destination =
-  redirect !== "/dashboard"
-    ? redirect
-    : getDashboardPath(
-        response.user.role
-      );
+      const destination =
+        redirect !== "/dashboard"
+          ? redirect
+          : getDashboardPath(user.role);
 
-router.push(destination);
+      router.push(destination);
     } catch (error) {
       setError(
         error instanceof Error
@@ -127,6 +145,7 @@ router.push(destination);
     <AuthLayout mode="login">
 
       {/* Error */}
+
       {error && (
         <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -134,12 +153,14 @@ router.push(destination);
       )}
 
       {/* Email / Password Login */}
+
       <form
         onSubmit={handleSubmit}
         className="space-y-4"
       >
 
         {/* Email */}
+
         <div>
           <label
             htmlFor="email"
@@ -162,6 +183,7 @@ router.push(destination);
         </div>
 
         {/* Password */}
+
         <div>
           <div className="mb-1.5 flex items-center justify-between">
             <label
@@ -193,6 +215,7 @@ router.push(destination);
         </div>
 
         {/* Submit */}
+
         <button
           type="submit"
           disabled={loading}
@@ -211,6 +234,7 @@ router.push(destination);
       </form>
 
       {/* Divider */}
+
       <div className="my-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-slate-200" />
 
@@ -222,18 +246,25 @@ router.push(destination);
       </div>
 
       {/* Google Login */}
+
       <div className="flex justify-center">
         <GoogleButton
-          onSuccess={handleGoogleSuccess}
+          onSuccess={
+            handleGoogleSuccess
+          }
           onError={handleGoogleError}
         />
       </div>
 
       {/* Register */}
+
       <p className="mt-6 text-center text-sm text-slate-500">
         New to HomeServe?{" "}
+
         <Link
-          href={`/register?redirect=${encodeURIComponent(redirect)}`}
+          href={`/register?redirect=${encodeURIComponent(
+            redirect
+          )}`}
           className="font-semibold text-blue-600 hover:text-blue-700"
         >
           Create an account
@@ -249,7 +280,9 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[#061F35]">
-          <p className="text-white">Loading login...</p>
+          <p className="text-white">
+            Loading login...
+          </p>
         </div>
       }
     >

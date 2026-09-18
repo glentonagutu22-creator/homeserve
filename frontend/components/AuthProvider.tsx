@@ -8,54 +8,136 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+} from "@/lib/auth";
+
 import { apiRequest } from "@/lib/api";
-import type { User } from "@/types/auth";
+
+import type {
+  LoginData,
+  LoginResponse,
+  User,
+} from "@/types/auth";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  refreshUser: () => Promise<void>;
+
+  login: (
+    data: LoginData
+  ) => Promise<User>;
+
+  googleLogin: (
+    credential: string
+  ) => Promise<User>;
+
   logout: () => Promise<void>;
+
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext =
-  createContext<AuthContextValue | null>(null);
+  createContext<AuthContextValue | undefined>(
+    undefined
+  );
 
 export function AuthProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] =
+    useState<User | null>(null);
 
+  const [loading, setLoading] =
+    useState(true);
+
+  /**
+   * Get the currently authenticated user
+   * from the backend.
+   */
   async function refreshUser() {
     try {
-      const response = await apiRequest<{
-        success: boolean;
-        user: User;
-      }>("/auth/me");
+      const currentUser =
+        await getCurrentUser();
 
-      setUser(response.user);
+      setUser(currentUser);
     } catch {
       setUser(null);
     }
   }
 
+  /**
+   * Normal email/password login.
+   *
+   * This calls the backend and then immediately
+   * updates the global authentication state.
+   */
+  async function login(
+    data: LoginData
+  ): Promise<User> {
+    const response =
+      await loginUser(data);
+
+    setUser(response.user);
+
+    return response.user;
+  }
+
+  /**
+   * Google login.
+   *
+   * The Google credential is sent to our backend.
+   * The backend verifies it, creates our HomeServe
+   * session cookie, and returns the HomeServe user.
+   */
+  async function googleLogin(
+    credential: string
+  ): Promise<User> {
+    const response =
+      await apiRequest<LoginResponse>(
+        "/auth/google",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            credential,
+          }),
+        }
+      );
+
+    setUser(response.user);
+
+    return response.user;
+  }
+
+  /**
+   * Logout.
+   */
   async function logout() {
     try {
-      await apiRequest("/auth/logout", {
-        method: "POST",
-      });
+      await logoutUser();
     } finally {
       setUser(null);
     }
   }
 
+  /**
+   * Restore authentication when the application
+   * starts.
+   */
   useEffect(() => {
-    refreshUser().finally(() => {
-      setLoading(false);
-    });
+    async function initializeAuth() {
+      try {
+        await refreshUser();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initializeAuth();
   }, []);
 
   return (
@@ -63,8 +145,10 @@ export function AuthProvider({
       value={{
         user,
         loading,
-        refreshUser,
+        login,
+        googleLogin,
         logout,
+        refreshUser,
       }}
     >
       {children}
@@ -73,7 +157,8 @@ export function AuthProvider({
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (!context) {
     throw new Error(
