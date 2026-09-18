@@ -4,6 +4,7 @@ import { prisma } from "./config/prisma";
 import authRoutes from "./modules/auth/auth.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 import cookieParser from "cookie-parser";
+
 import cleaningRoutes from "./modules/cleaning/cleaning.routes";
 import movingRoutes from "./modules/moving/moving.routes";
 import electricalRoutes from "./modules/electrical/electrical.routes";
@@ -27,24 +28,17 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
+app.use(cookieParser());
 
 app.get("/api/health", (_req, res) => {
   res.json({
     success: true,
     message: "Service Platform API is running",
-  });
-});
-
-app.get("/api/debug-auth", (req, res) => {
-  res.json({
-    hasAccessToken: Boolean(req.cookies?.accessToken),
-    origin: req.headers.origin || null,
-    userAgent: req.headers["user-agent"] || null,
   });
 });
 
@@ -67,19 +61,39 @@ app.get("/api/test-db", async (_req, res) => {
   }
 });
 
+/*
+ * TEMPORARY AUTH DEBUGGING
+ * Remove this after authentication is fixed.
+ */
+app.get("/api/debug-auth", (req, res) => {
+  res.json({
+    hasAccessToken: Boolean(req.cookies?.accessToken),
+    cookieHeader: req.headers.cookie || null,
+    origin: req.headers.origin || null,
+    host: req.headers.host || null,
+    frontendUrl:
+      process.env.FRONTEND_URL || null,
+    nodeEnv:
+      process.env.NODE_ENV || null,
+    userAgent:
+      req.headers["user-agent"] || null,
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/cleaning", cleaningRoutes);
 app.use("/api/moving", movingRoutes);
 app.use("/api/electrical", electricalRoutes);
 app.use("/api/bookings", bookingRoutes);
-app.use("/api/addresses",addressRoutes);
+app.use("/api/addresses", addressRoutes);
 app.use("/api/quotes", quoteRoutes);
 app.use("/api/pricing", pricingRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/settings",settingsRoutes);
-app.use("/api/notifications",notificationRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/notifications", notificationRoutes);
+
 /*
  * Global error handler
  * Must be registered after routes.
