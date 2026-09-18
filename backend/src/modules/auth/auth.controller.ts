@@ -27,13 +27,27 @@ export async function login(
 ) {
   const result = await loginUser(req.body);
 
-  res.cookie("accessToken", result.token, {
+  const cookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "none" as const,
     path: "/",
     maxAge: 24 * 60 * 60 * 1000,
+  };
+
+  console.log("AUTH COOKIE DEBUG:", {
+    nodeEnv: process.env.NODE_ENV,
+    origin: req.headers.origin,
+    userAgent: req.headers["user-agent"],
+    cookieOptions,
+    tokenCreated: Boolean(result.token),
   });
+
+  res.cookie(
+    "accessToken",
+    result.token,
+    cookieOptions
+  );
 
   return res.status(200).json({
     success: true,
