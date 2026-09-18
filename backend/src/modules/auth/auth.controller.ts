@@ -1,4 +1,6 @@
+
 import { Request, Response } from "express";
+
 import {
   registerUser,
   loginUser,
@@ -6,14 +8,9 @@ import {
   loginWithGoogle,
 } from "./auth.service";
 
-
-
-
-
 export async function register(
   req: Request,
   res: Response
-  
 ) {
   const user = await registerUser(req.body);
 
@@ -32,8 +29,9 @@ export async function login(
 
   res.cookie("accessToken", result.token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
+    path: "/",
     maxAge: 24 * 60 * 60 * 1000,
   });
 
@@ -66,8 +64,9 @@ export async function googleLogin(
 
   res.cookie("accessToken", result.token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
+    path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -84,8 +83,9 @@ export async function logout(
 ) {
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
+    path: "/",
   });
 
   return res.status(200).json({
