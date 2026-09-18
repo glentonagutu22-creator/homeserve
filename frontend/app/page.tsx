@@ -7,7 +7,7 @@ const services = [
     description:
       "Keep your home or workspace clean with reliable professional cleaning services.",
     href: "/services/cleaning",
-    image: "/images/cleaning-service.jpg",
+    image: "/images/cleaning-brand.png/image.png",
     accent: "blue",
   },
   {
@@ -15,7 +15,7 @@ const services = [
     description:
       "Make your move easier with dependable moving and relocation assistance.",
     href: "/services/moving",
-    image: "/images/moving-service.jpg",
+    image: "/images/moving-brand.png/image.png",
     accent: "green",
   },
   {
@@ -23,7 +23,7 @@ const services = [
     description:
       "Get professional electrical installation, maintenance and repair services.",
     href: "/services/electrical",
-    image: "/images/electrical-service.jpg",
+    image: "/images/electrical-brand.png/image.png",
     accent: "amber",
   },
 ];
@@ -212,7 +212,7 @@ export default function Home() {
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-800">
 
                 <Image
-                  src="/images/homeserve-bg.jpg"
+                  src="/images/homeserve-logo.png"
                   alt="HomeServe professional services"
                   fill
                   priority
