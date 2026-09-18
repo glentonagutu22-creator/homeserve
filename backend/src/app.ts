@@ -21,7 +21,9 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://homeserve-frontend.onrender.com",
+    origin:
+      process.env.FRONTEND_URL ||
+      "http://localhost:3000",
     credentials: true,
   })
 );
@@ -35,6 +37,14 @@ app.get("/api/health", (_req, res) => {
   res.json({
     success: true,
     message: "Service Platform API is running",
+  });
+});
+
+app.get("/api/debug-auth", (req, res) => {
+  res.json({
+    hasAccessToken: Boolean(req.cookies?.accessToken),
+    origin: req.headers.origin || null,
+    userAgent: req.headers["user-agent"] || null,
   });
 });
 
