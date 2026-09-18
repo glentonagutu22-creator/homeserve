@@ -221,21 +221,7 @@ export default function Home() {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#061F35]/80 via-transparent to-transparent" />
 
-                <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-white/10 bg-[#061F35]/85 p-5 backdrop-blur">
 
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
-                    HomeServe
-                  </p>
-
-                  <p className="mt-2 text-lg font-bold text-white">
-                    One platform. Multiple professional services.
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-300">
-                    Book, manage and track your services online.
-                  </p>
-
-                </div>
               </div>
             </div>
 
