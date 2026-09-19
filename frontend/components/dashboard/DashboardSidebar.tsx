@@ -101,9 +101,14 @@ const adminNavigation: NavigationItem[] = [
     href: "/admin/reports",
   },
   {
+    label: "Contact Messages",
+    href: "/admin/contact",
+  },
+  {
     label: "Settings",
     href: "/admin/settings",
   },
+  
 ];
 
 function getNavigation(role?: string) {

@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import DashboardShell from "@/components/dashboard/DashboardShell";
 
 import {
   createStaff,
@@ -27,8 +26,10 @@ const staffTypes: StaffType[] = [
 function formatStaffType(
   type: StaffType
 ) {
-  return type.charAt(0) +
-    type.slice(1).toLowerCase();
+  return (
+    type.charAt(0) +
+    type.slice(1).toLowerCase()
+  );
 }
 
 function getStaffTypeLabel(
@@ -170,10 +171,8 @@ export default function AdminStaffPage() {
     });
 
   return (
-    <>
-      <Navbar />
-
-      <main className="min-h-screen bg-slate-50">
+    <DashboardShell>
+      <main className="min-h-full bg-slate-50">
         {/* Header */}
         <section className="bg-[#061F35]">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -621,8 +620,6 @@ export default function AdminStaffPage() {
           </section>
         </div>
       </main>
-
-      <Footer />
-    </>
+    </DashboardShell>
   );
 }

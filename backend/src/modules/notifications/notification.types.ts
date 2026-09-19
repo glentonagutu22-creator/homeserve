@@ -16,6 +16,7 @@ export type NotificationType =
   | "PAYMENT_COMPLETED"
   | "PAYMENT_FAILED"
   | "PAYMENT_REFUNDED"
+  | "CONTACT_MESSAGE"
   | "REVIEW_RECEIVED";
 
 export type NotificationEntity =
@@ -23,7 +24,9 @@ export type NotificationEntity =
   | "QUOTE"
   | "PAYMENT"
   | "STAFF"
+  | "CONTACT_MESSAGE"
   | "REVIEW";
+  
 
 export interface CreateNotificationData {
   userId: string;

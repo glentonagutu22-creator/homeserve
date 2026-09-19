@@ -8,15 +8,7 @@ import type {
   CustomerRole,
 } from "@/types/customer";
 
-/*
-|--------------------------------------------------------------------------
-| Admin — Get all customers
-|--------------------------------------------------------------------------
-*/
-
-export async function getCustomers(): Promise<
-  Customer[]
-> {
+export async function getCustomers(): Promise<Customer[]> {
   const response =
     await apiRequest<CustomersResponse>(
       "/users/customers"
@@ -24,12 +16,6 @@ export async function getCustomers(): Promise<
 
   return response.customers;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Admin — Get single customer
-|--------------------------------------------------------------------------
-*/
 
 export async function getCustomer(
   id: string
@@ -42,35 +28,26 @@ export async function getCustomer(
   return response.customer;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Admin — Change customer role
-|--------------------------------------------------------------------------
-*/
-
 export async function updateCustomerRole(
   id: string,
   role: CustomerRole
-): Promise<CustomerDetail> {
-  const response =
-    await apiRequest<CustomerResponse>(
-      `/users/customers/${id}/role`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({
-          role,
-        }),
-      }
-    );
+): Promise<Customer> {
+  const response = await apiRequest<{
+    success: boolean;
+    message: string;
+    user: Customer;
+  }>(
+    `/users/customers/${id}/role`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        role,
+      }),
+    }
+  );
 
-  return response.customer;
+  return response.user;
 }
-
-/*
-|--------------------------------------------------------------------------
-| Admin — Delete customer
-|--------------------------------------------------------------------------
-*/
 
 export async function deleteCustomer(
   id: string

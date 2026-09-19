@@ -8,6 +8,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "@/components/AuthProvider";
+
 import type { Service } from "@/types/service";
 import type { Address } from "@/lib/addresses";
 import { getAddresses } from "@/lib/addresses";
@@ -47,6 +49,8 @@ export default function BookingForm({
   returnTo,
 }: BookingFormProps) {
   const router = useRouter();
+
+  const { user, loading: authLoading } = useAuth();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loadingAddresses, setLoadingAddresses] =
@@ -121,6 +125,20 @@ export default function BookingForm({
   ] = useState("");
 
   useEffect(() => {
+    // Wait until AuthProvider has finished checking
+    // the current authentication session.
+    if (authLoading) {
+      return;
+    }
+
+    // If there is no authenticated user, show the
+    // existing login-required notice.
+    if (!user) {
+      setAuthRequired(true);
+      setLoadingAddresses(false);
+      return;
+    }
+
     async function loadAddresses() {
       try {
         setLoadingAddresses(true);
@@ -155,7 +173,7 @@ export default function BookingForm({
     }
 
     loadAddresses();
-  }, []);
+  }, [authLoading, user]);
 
   function getBookingType():
     | "INSTANT"
@@ -495,6 +513,25 @@ export default function BookingForm({
     );
   }
 
+  /*
+   * Authentication is still being checked.
+   * Do not attempt to load addresses or show the
+   * booking form until AuthProvider finishes.
+   */
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#061F35] px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex min-h-[80vh] items-center justify-center">
+          <div className="rounded-2xl bg-white px-6 py-5 text-center shadow-2xl">
+            <p className="text-sm font-medium text-[#061F35]">
+              Checking your account...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#061F35] px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
@@ -580,11 +617,11 @@ export default function BookingForm({
                 <button
                   type="button"
                   onClick={() =>
-                   router.push(
-  returnTo
-    ? `/addresses?returnTo=${encodeURIComponent(returnTo)}`
-    : "/addresses"
-)
+                    router.push(
+                      returnTo
+                        ? `/addresses?returnTo=${encodeURIComponent(returnTo)}`
+                        : "/addresses"
+                    )
                   }
                   className="mt-3 text-sm font-semibold text-amber-900 underline"
                 >
@@ -811,11 +848,7 @@ export default function BookingForm({
           {/* Schedule */}
           <section className="mb-8">
             <SectionTitle
-              number={
-                service.pricingType === "CALCULATED"
-                  ? "04"
-                  : "04"
-              }
+              number="04"
               title="Preferred Schedule"
             />
 

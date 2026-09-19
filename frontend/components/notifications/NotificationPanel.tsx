@@ -57,6 +57,13 @@ function getNotificationLink(
 
       return `/quotes/${notification.relatedEntityId}`;
 
+    case "CONTACT_MESSAGE":
+      if (role === "ADMIN") {
+        return "/admin/contact";
+      }
+
+      return null;
+
     default:
       return null;
   }

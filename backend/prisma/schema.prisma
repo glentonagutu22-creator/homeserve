@@ -24,6 +24,23 @@ model User {
   staffProfile  StaffProfile?
   settings      UserSetting?
 }
+model ContactMessage {
+  id        String   @id @default(uuid())
+
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+
+  status    ContactMessageStatus @default(NEW)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
 
 model Notification {
   id              String    @id @default(uuid())
@@ -334,4 +351,10 @@ enum StaffType {
   MOVER
   ELECTRICIAN
   SUPERVISOR
+}
+enum ContactMessageStatus {
+  NEW
+  READ
+  RESPONDED
+  CLOSED
 }

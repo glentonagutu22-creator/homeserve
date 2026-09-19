@@ -23,16 +23,12 @@ function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-function formatCurrency(
-  amount: string | null
-) {
+function formatCurrency(amount: string | null) {
   if (!amount) {
     return "Pending quote";
   }
 
-  return `KSh ${Number(amount).toLocaleString(
-    "en-KE"
-  )}`;
+  return `KSh ${Number(amount).toLocaleString("en-KE")}`;
 }
 
 function getStatusClasses(status: string) {
@@ -54,6 +50,19 @@ function getStatusClasses(status: string) {
 
     case "CANCELLED":
       return "bg-red-50 text-red-700";
+
+    default:
+      return "bg-slate-100 text-slate-700";
+  }
+}
+
+function getRoleClasses(role: CustomerRole) {
+  switch (role) {
+    case "ADMIN":
+      return "bg-purple-50 text-purple-700";
+
+    case "CUSTOMER":
+      return "bg-blue-50 text-blue-700";
 
     default:
       return "bg-slate-100 text-slate-700";
@@ -85,20 +94,14 @@ function Section({
 export default function AdminCustomerDetailsPage() {
   const params = useParams();
 
-  const customerId = String(
-    params.id
-  );
+  const customerId = String(params.id);
 
   const [customer, setCustomer] =
-    useState<CustomerDetail | null>(
-      null
-    );
+    useState<CustomerDetail | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   const [selectedRole, setSelectedRole] =
     useState<CustomerRole>("CUSTOMER");
@@ -112,13 +115,15 @@ export default function AdminCustomerDetailsPage() {
   const [actionError, setActionError] =
     useState("");
 
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
   async function loadCustomer() {
     try {
       setLoading(true);
       setError("");
 
-      const data =
-        await getCustomer(customerId);
+      const data = await getCustomer(customerId);
 
       setCustomer(data);
       setSelectedRole(data.role);
@@ -126,7 +131,7 @@ export default function AdminCustomerDetailsPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Failed to load customer"
+          : "Failed to load user"
       );
     } finally {
       setLoading(false);
@@ -137,58 +142,88 @@ export default function AdminCustomerDetailsPage() {
     loadCustomer();
   }, [customerId]);
 
-  async function handleRoleChange() {
-    if (!customer) {
-      return;
-    }
+async function handleRoleChange() {
+  if (!customer) {
+    return;
+  }
 
-    if (selectedRole === customer.role) {
-      return;
-    }
+  if (selectedRole === customer.role) {
+    return;
+  }
 
-    const confirmed = window.confirm(
-      `Change ${customer.name}'s role from ${customer.role} to ${selectedRole}?`
+  const oldRole = customer.role;
+  const newRole = selectedRole;
+
+  const confirmed = window.confirm(
+    `Are you sure you want to change ${customer.name}'s role from ${oldRole} to ${newRole}?`
+  );
+
+  if (!confirmed) {
+    setSelectedRole(customer.role);
+    return;
+  }
+
+  try {
+    setChangingRole(true);
+    setActionError("");
+    setSuccessMessage("");
+
+    const updated = await updateCustomerRole(
+      customer.id,
+      newRole
     );
 
-    if (!confirmed) {
-      setSelectedRole(customer.role);
-      return;
-    }
+    /*
+     * The role-update endpoint returns a basic
+     * Customer object, not a complete CustomerDetail.
+     *
+     * Therefore, preserve the existing CustomerDetail
+     * and only replace the fields returned by the
+     * role-update request.
+     */
+    setCustomer((current) => {
+      if (!current) {
+        return current;
+      }
 
-    try {
-      setChangingRole(true);
-      setActionError("");
+      return {
+        ...current,
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        phone: updated.phone,
+        role: updated.role,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
+      };
+    });
 
-      const updated =
-        await updateCustomerRole(
-          customer.id,
-          selectedRole
-        );
+    setSelectedRole(updated.role);
 
-      setCustomer(updated);
-      setSelectedRole(updated.role);
-    } catch (error) {
-      setActionError(
-        error instanceof Error
-          ? error.message
-          : "Failed to change customer role"
-      );
+    setSuccessMessage(
+      `${updated.name}'s role has been changed from ${oldRole} to ${updated.role}.`
+    );
+  } catch (error) {
+    setActionError(
+      error instanceof Error
+        ? error.message
+        : "Failed to change user role"
+    );
 
-      setSelectedRole(customer.role);
-    } finally {
-      setChangingRole(false);
-    }
+    setSelectedRole(customer.role);
+  } finally {
+    setChangingRole(false);
   }
+}
 
   async function handleDelete() {
     if (!customer) {
       return;
     }
 
-    const confirmed =
-      window.confirm(
-        `Are you sure you want to permanently delete ${customer.name}'s account?\n\nThis action cannot be undone.`
-      );
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete ${customer.name}'s account?\n\nThis action cannot be undone.`
+    );
 
     if (!confirmed) {
       return;
@@ -197,13 +232,11 @@ export default function AdminCustomerDetailsPage() {
     try {
       setDeleting(true);
       setActionError("");
+      setSuccessMessage("");
 
-      await deleteCustomer(
-        customer.id
-      );
+      await deleteCustomer(customer.id);
 
-      window.location.href =
-        "/admin/customers";
+      window.location.href = "/admin/customers";
     } catch (error) {
       setActionError(
         error instanceof Error
@@ -220,7 +253,7 @@ export default function AdminCustomerDetailsPage() {
       <DashboardShell>
         <div className="flex min-h-[60vh] items-center justify-center">
           <p className="text-sm text-slate-500">
-            Loading customer...
+            Loading user...
           </p>
         </div>
       </DashboardShell>
@@ -235,12 +268,11 @@ export default function AdminCustomerDetailsPage() {
             href="/admin/customers"
             className="text-sm font-medium text-blue-600 hover:text-blue-700"
           >
-            ← Back to customers
+            ← Back to users
           </Link>
 
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-            {error ||
-              "Customer not found"}
+            {error || "User not found"}
           </div>
         </div>
       </DashboardShell>
@@ -257,27 +289,53 @@ export default function AdminCustomerDetailsPage() {
             href="/admin/customers"
             className="text-sm font-medium text-blue-600 hover:text-blue-700"
           >
-            ← Back to customers
+            ← Back to users
           </Link>
 
           <div className="mt-4">
             <p className="text-sm font-medium text-blue-600">
-              Customer details
+              User details
             </p>
 
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              {customer.name}
-            </h1>
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                {customer.name}
+              </h1>
+
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${getRoleClasses(
+                  customer.role
+                )}`}
+              >
+                {customer.role}
+              </span>
+            </div>
 
             <p className="mt-2 text-sm text-slate-500">
-              Customer since{" "}
-              {formatDate(
-                customer.createdAt
-              )}
+              Account created{" "}
+              {formatDate(customer.createdAt)}
             </p>
           </div>
         </div>
 
+        {/* Success message */}
+        {successMessage && (
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-4 text-sm text-green-700">
+            <span className="font-bold">✓</span>
+
+            <div>
+              <p className="font-semibold">
+                Role updated successfully
+              </p>
+
+              <p className="mt-1">
+                {successMessage}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Error message */}
         {actionError && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {actionError}
@@ -290,8 +348,9 @@ export default function AdminCustomerDetailsPage() {
           <div className="space-y-6 xl:col-span-2">
 
             {/* Profile */}
-            <Section title="Customer information">
+            <Section title="User information">
               <div className="grid gap-5 sm:grid-cols-2">
+
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
                     Name
@@ -318,8 +377,7 @@ export default function AdminCustomerDetailsPage() {
                   </p>
 
                   <p className="mt-1 text-sm text-slate-800">
-                    {customer.phone ||
-                      "—"}
+                    {customer.phone || "—"}
                   </p>
                 </div>
 
@@ -329,20 +387,18 @@ export default function AdminCustomerDetailsPage() {
                   </p>
 
                   <p className="mt-1 text-sm text-slate-800">
-                    {formatDate(
-                      customer.createdAt
-                    )}
+                    {formatDate(customer.createdAt)}
                   </p>
                 </div>
+
               </div>
             </Section>
 
             {/* Bookings */}
             <Section title="Booking history">
-              {customer.bookings.length ===
-              0 ? (
+              {customer.bookings.length === 0 ? (
                 <p className="text-sm text-slate-500">
-                  This customer has no bookings.
+                  This user has no bookings.
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -354,19 +410,14 @@ export default function AdminCustomerDetailsPage() {
                         className="block rounded-lg border border-slate-200 p-4 transition hover:border-blue-200 hover:bg-slate-50"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
                           <div>
                             <p className="text-sm font-semibold text-slate-900">
-                              {
-                                booking.bookingNumber
-                              }
+                              {booking.bookingNumber}
                             </p>
 
                             <p className="mt-1 text-xs text-slate-500">
-                              {
-                                booking
-                                  .service
-                                  .name
-                              }
+                              {booking.service.name}
                             </p>
                           </div>
 
@@ -380,9 +431,11 @@ export default function AdminCustomerDetailsPage() {
                               " "
                             )}
                           </span>
+
                         </div>
 
                         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+
                           <div>
                             <p className="text-xs text-slate-400">
                               Date
@@ -401,9 +454,7 @@ export default function AdminCustomerDetailsPage() {
                             </p>
 
                             <p className="mt-1 text-sm text-slate-700">
-                              {
-                                booking.scheduledTime
-                              }
+                              {booking.scheduledTime}
                             </p>
                           </div>
 
@@ -418,6 +469,7 @@ export default function AdminCustomerDetailsPage() {
                               )}
                             </p>
                           </div>
+
                         </div>
                       </Link>
                     )
@@ -428,10 +480,9 @@ export default function AdminCustomerDetailsPage() {
 
             {/* Addresses */}
             <Section title="Saved addresses">
-              {customer.addresses.length ===
-              0 ? (
+              {customer.addresses.length === 0 ? (
                 <p className="text-sm text-slate-500">
-                  This customer has no saved addresses.
+                  This user has no saved addresses.
                 </p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -446,9 +497,7 @@ export default function AdminCustomerDetailsPage() {
                         </p>
 
                         <p className="mt-2 text-sm text-slate-600">
-                          {
-                            address.addressLine
-                          }
+                          {address.addressLine}
                         </p>
 
                         <p className="mt-1 text-xs text-slate-500">
@@ -461,20 +510,19 @@ export default function AdminCustomerDetailsPage() {
                 </div>
               )}
             </Section>
+
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
 
-            {/* Stats */}
+            {/* Activity */}
             <Section title="Activity">
               <div className="grid grid-cols-3 gap-3">
+
                 <div className="rounded-lg bg-slate-50 p-3 text-center">
                   <p className="text-xl font-bold text-slate-900">
-                    {
-                      customer._count
-                        .bookings
-                    }
+                    {customer._count.bookings}
                   </p>
 
                   <p className="mt-1 text-[11px] text-slate-500">
@@ -484,10 +532,7 @@ export default function AdminCustomerDetailsPage() {
 
                 <div className="rounded-lg bg-slate-50 p-3 text-center">
                   <p className="text-xl font-bold text-slate-900">
-                    {
-                      customer._count
-                        .addresses
-                    }
+                    {customer._count.addresses}
                   </p>
 
                   <p className="mt-1 text-[11px] text-slate-500">
@@ -497,33 +542,48 @@ export default function AdminCustomerDetailsPage() {
 
                 <div className="rounded-lg bg-slate-50 p-3 text-center">
                   <p className="text-xl font-bold text-slate-900">
-                    {
-                      customer._count
-                        .reviews
-                    }
+                    {customer._count.reviews}
                   </p>
 
                   <p className="mt-1 text-[11px] text-slate-500">
                     Reviews
                   </p>
                 </div>
+
               </div>
             </Section>
 
             {/* Role */}
             <Section title="Account role">
-              <p className="text-sm text-slate-500">
+
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-500">
+                  Current role
+                </p>
+
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${getRoleClasses(
+                    customer.role
+                  )}`}
+                >
+                  {customer.role}
+                </span>
+              </div>
+
+              <p className="mt-4 text-sm text-slate-500">
                 Change the role assigned to this account.
               </p>
 
               <select
                 value={selectedRole}
-                onChange={(event) =>
+                onChange={(event) => {
                   setSelectedRole(
-                    event.target
-                      .value as CustomerRole
-                  )
-                }
+                    event.target.value as CustomerRole
+                  );
+
+                  setActionError("");
+                  setSuccessMessage("");
+                }}
                 disabled={changingRole}
                 className="mt-4 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-60"
               >
@@ -538,13 +598,10 @@ export default function AdminCustomerDetailsPage() {
 
               <button
                 type="button"
-                onClick={
-                  handleRoleChange
-                }
+                onClick={handleRoleChange}
                 disabled={
                   changingRole ||
-                  selectedRole ===
-                    customer.role
+                  selectedRole === customer.role
                 }
                 className="mt-3 h-11 w-full rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -554,31 +611,41 @@ export default function AdminCustomerDetailsPage() {
               </button>
 
               <p className="mt-3 text-xs leading-5 text-slate-400">
-                Staff accounts must be created through the Staff management module so that a StaffProfile is created correctly.
+                Only CUSTOMER and ADMIN roles can be
+                changed here. Staff accounts are managed
+                through Staff Management.
               </p>
+
             </Section>
 
-            {/* Delete */}
-            <section className="rounded-xl border border-red-200 bg-white p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-red-700">
-                Danger zone
-              </h2>
+            {/* Danger zone */}
+            {customer.role === "CUSTOMER" && (
+              <section className="rounded-xl border border-red-200 bg-white p-5 shadow-sm">
 
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                Permanently delete this customer account. Customers with existing bookings cannot be deleted.
-              </p>
+                <h2 className="text-base font-semibold text-red-700">
+                  Danger zone
+                </h2>
 
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="mt-4 h-11 w-full rounded-lg border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {deleting
-                  ? "Deleting..."
-                  : "Delete customer"}
-              </button>
-            </section>
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  Permanently delete this customer
+                  account. Customers with existing
+                  bookings cannot be deleted.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="mt-4 h-11 w-full rounded-lg border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deleting
+                    ? "Deleting..."
+                    : "Delete customer"}
+                </button>
+
+              </section>
+            )}
+
           </div>
         </div>
       </div>

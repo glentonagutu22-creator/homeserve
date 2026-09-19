@@ -24,12 +24,6 @@ const router = Router();
 
 /*
 |--------------------------------------------------------------------------
-| Admin — Get all customers
-|--------------------------------------------------------------------------
-*/
-
-/*
-|--------------------------------------------------------------------------
 | Authenticated user — Update own profile
 |--------------------------------------------------------------------------
 */
@@ -39,6 +33,12 @@ router.patch(
   authenticate,
   asyncHandler(updateProfile)
 );
+
+/*
+|--------------------------------------------------------------------------
+| Admin — Get all customers
+|--------------------------------------------------------------------------
+*/
 
 router.get(
   "/customers",
@@ -63,8 +63,18 @@ router.get(
 
 /*
 |--------------------------------------------------------------------------
-| Admin — Change customer role
+| Admin — Change user role
 |--------------------------------------------------------------------------
+|
+| Supports:
+|
+| CUSTOMER → ADMIN
+| ADMIN    → CUSTOMER
+|
+| The service layer enforces additional security rules,
+| including preventing self-demotion and demotion of the
+| last remaining administrator.
+|
 */
 
 router.patch(
@@ -75,6 +85,7 @@ router.patch(
   validate(changeCustomerRoleSchema),
   asyncHandler(updateCustomerRole)
 );
+
 /*
 |--------------------------------------------------------------------------
 | Admin — Delete customer
@@ -88,4 +99,5 @@ router.delete(
   validate(customerIdSchema, "params"),
   asyncHandler(removeCustomer)
 );
+
 export default router;

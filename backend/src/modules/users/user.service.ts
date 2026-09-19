@@ -8,11 +8,22 @@ import { AppError } from "../../utils/AppError";
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| Admin — Get all manageable users
+|--------------------------------------------------------------------------
+*/
+
 export async function getAllCustomers() {
   const customers =
     await prisma.user.findMany({
       where: {
-        role: UserRole.CUSTOMER,
+        role: {
+          in: [
+            UserRole.CUSTOMER,
+            UserRole.ADMIN,
+          ],
+        },
       },
 
       orderBy: {
@@ -48,12 +59,17 @@ export async function getAllCustomers() {
 export async function getCustomerById(
   customerId: string
 ) {
-  const customer =
-    await prisma.user.findFirst({
-      where: {
-        id: customerId,
-        role: UserRole.CUSTOMER,
+const customer =
+  await prisma.user.findFirst({
+    where: {
+      id: customerId,
+      role: {
+        in: [
+          UserRole.CUSTOMER,
+          UserRole.ADMIN,
+        ],
       },
+    },
 
       select: {
         id: true,
@@ -115,29 +131,90 @@ export async function getCustomerById(
 
   return customer;
 }
-
 /*
 |--------------------------------------------------------------------------
-| Change customer role
+| Admin — Change user role
 |--------------------------------------------------------------------------
 */
 
-export async function changeCustomerRole(
-  customerId: string,
+export async function changeUserRole(
+  requesterId: string,
+  targetUserId: string,
   newRole: "CUSTOMER" | "ADMIN"
 ) {
-  const customer =
-    await prisma.user.findFirst({
+  /*
+  |--------------------------------------------------------------------------
+  | Prevent an admin from changing their own role
+  |--------------------------------------------------------------------------
+  */
+
+  if (requesterId === targetUserId) {
+    throw new AppError(
+      "You cannot change your own role",
+      400
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Find target user
+  |--------------------------------------------------------------------------
+  */
+
+  const targetUser =
+    await prisma.user.findUnique({
       where: {
-        id: customerId,
-        role: UserRole.CUSTOMER,
+        id: targetUserId,
+      },
+
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
-  if (!customer) {
+  if (!targetUser) {
     throw new AppError(
-      "Customer not found",
+      "User not found",
       404
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Only CUSTOMER and ADMIN roles can be
+  | changed through this operation.
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    targetUser.role !== UserRole.CUSTOMER &&
+    targetUser.role !== UserRole.ADMIN
+  ) {
+    throw new AppError(
+      "This user's role cannot be changed here",
+      400
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Validate requested role
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    newRole !== UserRole.CUSTOMER &&
+    newRole !== UserRole.ADMIN
+  ) {
+    throw new AppError(
+      "Invalid user role",
+      400
     );
   }
 
@@ -147,35 +224,49 @@ export async function changeCustomerRole(
   |--------------------------------------------------------------------------
   */
 
-  if (
-    newRole ===
-    UserRole.CUSTOMER
-  ) {
-    return {
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      role: customer.role,
-      createdAt: customer.createdAt,
-      updatedAt: customer.updatedAt,
-    };
+  if (targetUser.role === newRole) {
+    return targetUser;
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Promote customer to admin
+  | Prevent removal of the last administrator
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    targetUser.role === UserRole.ADMIN &&
+    newRole === UserRole.CUSTOMER
+  ) {
+    const adminCount =
+      await prisma.user.count({
+        where: {
+          role: UserRole.ADMIN,
+        },
+      });
+
+    if (adminCount <= 1) {
+      throw new AppError(
+        "The last administrator cannot be demoted. Promote another administrator first.",
+        400
+      );
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Update role
   |--------------------------------------------------------------------------
   */
 
   const updatedUser =
     await prisma.user.update({
       where: {
-        id: customer.id,
+        id: targetUser.id,
       },
 
       data: {
-        role: UserRole.ADMIN,
+        role: newRole,
       },
 
       select: {
@@ -191,7 +282,6 @@ export async function changeCustomerRole(
 
   return updatedUser;
 }
-
 /*
 |--------------------------------------------------------------------------
 | Delete customer

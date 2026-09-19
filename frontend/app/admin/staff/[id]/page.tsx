@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useMemo, useState } from "react";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import DashboardShell from "@/components/dashboard/DashboardShell";
 
 import {
   assignStaff,
@@ -211,8 +210,6 @@ export default function AdminStaffDetailPage({
     useMemo(() => {
       return bookings.filter(
         (booking) => {
-          // Do not show completed/cancelled
-          // bookings.
           if (
             booking.status ===
               "CANCELLED" ||
@@ -222,8 +219,6 @@ export default function AdminStaffDetailPage({
             return false;
           }
 
-          // Do not show bookings already
-          // assigned to this staff member.
           if (
             assignedBookingIds.has(
               booking.id
@@ -232,7 +227,6 @@ export default function AdminStaffDetailPage({
             return false;
           }
 
-          // Filter by staff qualification.
           if (
             staffType ===
             "CLEANER"
@@ -265,8 +259,6 @@ export default function AdminStaffDetailPage({
             );
           }
 
-          // Supervisors can be assigned
-          // to any active booking.
           return true;
         }
       );
@@ -427,28 +419,22 @@ export default function AdminStaffDetailPage({
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-
-        <main className="min-h-screen bg-slate-50">
+      <DashboardShell>
+        <main className="min-h-full bg-slate-50">
           <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
             <p className="text-sm text-slate-500">
               Loading staff member...
             </p>
           </div>
         </main>
-
-        <Footer />
-      </>
+      </DashboardShell>
     );
   }
 
   if (!staff) {
     return (
-      <>
-        <Navbar />
-
-        <main className="min-h-screen bg-slate-50">
+      <DashboardShell>
+        <main className="min-h-full bg-slate-50">
           <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
             <h1 className="text-2xl font-bold text-slate-900">
               Staff member not found
@@ -467,17 +453,13 @@ export default function AdminStaffDetailPage({
             </Link>
           </div>
         </main>
-
-        <Footer />
-      </>
+      </DashboardShell>
     );
   }
 
   return (
-    <>
-      <Navbar />
-
-      <main className="min-h-screen bg-slate-50">
+    <DashboardShell>
+      <main className="min-h-full bg-slate-50">
         {/* Header */}
         <section className="bg-[#061F35]">
           <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -743,7 +725,6 @@ export default function AdminStaffDetailPage({
                         )}
                       </select>
 
-                      {/* Selected booking preview */}
                       {selectedBooking && (
                         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1037,8 +1018,6 @@ export default function AdminStaffDetailPage({
           </div>
         </div>
       </main>
-
-      <Footer />
-    </>
+    </DashboardShell>
   );
 }

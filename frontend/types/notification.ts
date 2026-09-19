@@ -14,7 +14,8 @@ export type NotificationType =
   | "PAYMENT_COMPLETED"
   | "PAYMENT_FAILED"
   | "PAYMENT_REFUNDED"
-  | "REVIEW_RECEIVED";
+  | "REVIEW_RECEIVED"
+  "CONTACT_MESSAGE";
 
 export interface Notification {
   id: string;

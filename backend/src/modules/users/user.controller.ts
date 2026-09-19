@@ -3,11 +3,10 @@ import { Request, Response } from "express";
 import {
   getAllCustomers,
   getCustomerById,
-  changeCustomerRole,
+  changeUserRole,
   deleteCustomer,
   updateMyProfile,
 } from "./user.service";
-
 /*
 |--------------------------------------------------------------------------
 | Admin — Get all customers
@@ -54,12 +53,19 @@ export async function getCustomer(
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| Admin — Change user role
+|--------------------------------------------------------------------------
+*/
+
 export async function updateCustomerRole(
   req: Request,
   res: Response
 ) {
-  const customer =
-    await changeCustomerRole(
+  const user =
+    await changeUserRole(
+      req.user!.userId,
       String(req.params.id),
       req.body.role
     );
@@ -67,8 +73,8 @@ export async function updateCustomerRole(
   return res.status(200).json({
     success: true,
     message:
-      "Customer role updated successfully",
-    customer,
+      "User role updated successfully",
+    user,
   });
 }
 

@@ -4,7 +4,7 @@ import { prisma } from "./config/prisma";
 import authRoutes from "./modules/auth/auth.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 import cookieParser from "cookie-parser";
-
+import reportsRoutes from "./modules/reports/reports.routes";
 import cleaningRoutes from "./modules/cleaning/cleaning.routes";
 import movingRoutes from "./modules/moving/moving.routes";
 import electricalRoutes from "./modules/electrical/electrical.routes";
@@ -17,6 +17,8 @@ import userRoutes from "./modules/users/user.routes";
 import paymentRoutes from "./modules/payments/payment.routes";
 import settingsRoutes from "./modules/settings/settings.routes";
 import notificationRoutes from "./modules/notifications/notification.routes";
+import contactRoutes from "./modules/contact/contact.routes";
+
 
 const app = express();
 
@@ -59,43 +61,8 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.get("/api/test-db", async (_req, res) => {
-  try {
-    const userCount = await prisma.user.count();
 
-    res.json({
-      success: true,
-      message: "Database connection is working",
-      userCount,
-    });
-  } catch (error) {
-    console.error("Database test failed:", error);
 
-    res.status(500).json({
-      success: false,
-      message: "Database connection failed",
-    });
-  }
-});
-
-/*
- * TEMPORARY AUTH DEBUGGING
- * Remove this after authentication is fixed.
- */
-app.get("/api/debug-auth", (req, res) => {
-  res.json({
-    hasAccessToken: Boolean(req.cookies?.accessToken),
-    cookieHeader: req.headers.cookie || null,
-    origin: req.headers.origin || null,
-    host: req.headers.host || null,
-    frontendUrl:
-      process.env.FRONTEND_URL || null,
-    nodeEnv:
-      process.env.NODE_ENV || null,
-    userAgent:
-      req.headers["user-agent"] || null,
-  });
-});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/cleaning", cleaningRoutes);
@@ -110,7 +77,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/reports", reportsRoutes);
+app.use("/api/contact", contactRoutes);
 /*
  * Global error handler
  * Must be registered after routes.
