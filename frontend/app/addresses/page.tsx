@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -7,6 +8,7 @@ import {
   useState,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
 import {
   Address,
   CreateAddressData,
@@ -15,6 +17,7 @@ import {
   getAddresses,
   updateAddress,
 } from "@/lib/addresses";
+
 import DashboardShell from "@/components/dashboard/DashboardShell";
 
 const emptyForm: CreateAddressData = {
@@ -31,22 +34,15 @@ function AddressesContent() {
   const returnTo = searchParams.get("returnTo");
 
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [form, setForm] =
-    useState<CreateAddressData>(emptyForm);
-
-  const [editingId, setEditingId] =
-    useState<string | null>(null);
+  const [form, setForm] = useState<CreateAddressData>(emptyForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] =
-    useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const [success, setSuccess] =
-    useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function loadAddresses() {
     try {
@@ -54,7 +50,6 @@ function AddressesContent() {
       setError(null);
 
       const data = await getAddresses();
-
       setAddresses(data);
     } catch (error) {
       setError(
@@ -89,10 +84,8 @@ function AddressesContent() {
       addressLine: address.addressLine,
       city: address.city,
       county: address.county,
-      latitude:
-        address.latitude ?? undefined,
-      longitude:
-        address.longitude ?? undefined,
+      latitude: address.latitude ?? undefined,
+      longitude: address.longitude ?? undefined,
     });
 
     setError(null);
@@ -110,9 +103,7 @@ function AddressesContent() {
     setError(null);
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     try {
@@ -121,16 +112,11 @@ function AddressesContent() {
       setSuccess(null);
 
       if (editingId) {
-        const updated = await updateAddress(
-          editingId,
-          form
-        );
+        const updated = await updateAddress(editingId, form);
 
         setAddresses((current) =>
           current.map((address) =>
-            address.id === editingId
-              ? updated
-              : address
+            address.id === editingId ? updated : address
           )
         );
 
@@ -139,19 +125,10 @@ function AddressesContent() {
         setEditingId(null);
         setForm(emptyForm);
       } else {
-        const created =
-          await createAddress(form);
+        const created = await createAddress(form);
 
-        setAddresses((current) => [
-          created,
-          ...current,
-        ]);
+        setAddresses((current) => [created, ...current]);
 
-        /*
-         * If the user came here from a booking form,
-         * return them to that booking form after
-         * successfully creating the address.
-         */
         if (returnTo) {
           router.push(returnTo);
           return;
@@ -188,9 +165,7 @@ function AddressesContent() {
       await deleteAddress(id);
 
       setAddresses((current) =>
-        current.filter(
-          (address) => address.id !== id
-        )
+        current.filter((address) => address.id !== id)
       );
 
       setSuccess("Address deleted successfully.");
@@ -216,29 +191,24 @@ function AddressesContent() {
 
   return (
     <DashboardShell>
-      <main className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+      <main className="min-h-full bg-slate-50 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mx-auto max-w-6xl space-y-5 sm:space-y-7">
 
-          {/* =====================================================
-              HEADER
-          ===================================================== */}
-
-          <div className="mb-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
+          {/* Page heading */}
+          <div className="border border-[#061F35] bg-[#061F35] px-4 py-4 sm:px-5 sm:py-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-200">
                   Customer Account
                 </p>
 
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#061F35] sm:text-3xl">
+                <h1 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
                   My Addresses
                 </h1>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                  Save the locations where you need
-                  HomeServe services. Your saved addresses
-                  can be selected when making a booking.
+                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-blue-100 sm:text-sm">
+                  Manage your saved service locations for faster and easier
+                  bookings.
                 </p>
               </div>
 
@@ -246,71 +216,87 @@ function AddressesContent() {
                 <button
                   type="button"
                   onClick={handleBackToBooking}
-                  className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600"
+                  className="w-fit shrink-0 border border-white/30 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10"
                 >
-                  <span>←</span>
-                  Back to booking
+                  ← Back to booking
                 </button>
               )}
-
             </div>
-
-            {/* Booking context */}
-            {returnTo && (
-              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-                <p className="text-sm text-blue-800">
-                  Add your service address below and
-                  you'll automatically return to your
-                  booking.
-                </p>
-              </div>
-            )}
           </div>
 
-          {/* =====================================================
-              CONTENT
-          ===================================================== */}
+          {/* Booking context */}
+          {returnTo && (
+            <div className="flex items-start gap-3 border border-blue-200 bg-blue-50 px-3 py-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center bg-blue-100 text-xs font-bold text-blue-700">
+                i
+              </span>
 
-          <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+              <p className="text-xs leading-relaxed text-blue-800">
+                Add your service address below and you'll automatically return
+                to your booking.
+              </p>
+            </div>
+          )}
 
-            {/* =================================================
-                ADDRESS FORM
-            ================================================= */}
+          {/* Feedback messages */}
+          {error && (
+            <div className="flex items-start gap-2 border border-red-200 bg-red-50 px-3 py-3 text-xs text-red-700">
+              <span className="font-bold">!</span>
+              <p className="min-w-0 flex-1">{error}</p>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="shrink-0 font-bold"
+                aria-label="Dismiss error"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
-            <section className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          {success && (
+            <div className="flex items-start gap-2 border border-green-200 bg-green-50 px-3 py-3 text-xs text-green-700">
+              <span className="font-bold">✓</span>
+              <p className="min-w-0 flex-1">{success}</p>
+              <button
+                type="button"
+                onClick={() => setSuccess(null)}
+                className="shrink-0 font-bold"
+                aria-label="Dismiss success message"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
-                  {editingId
-                    ? "Edit Address"
-                    : "New Address"}
+          {/* Main content */}
+          <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-6">
+
+            {/* Address form */}
+            <section className="h-fit border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="border-b border-slate-100 pb-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                  {editingId ? "Edit Address" : "New Address"}
                 </p>
 
-                <h2 className="mt-2 text-xl font-bold text-[#061F35] sm:text-2xl">
-                  {editingId
-                    ? "Update your address"
-                    : "Add an address"}
+                <h2 className="mt-1 text-lg font-bold text-[#061F35]">
+                  {editingId ? "Update your address" : "Add an address"}
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
                   {editingId
                     ? "Update the details of your saved service location."
                     : "Save a location for faster and easier bookings."}
                 </p>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                className="mt-6 space-y-4"
-              >
-
-                {/* Label */}
+              <form onSubmit={handleSubmit} className="mt-4 space-y-3">
                 <div>
                   <label
                     htmlFor="label"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-1.5 block text-xs font-semibold text-slate-700"
                   >
-                    Label
+                    Address label
                   </label>
 
                   <input
@@ -318,24 +304,20 @@ function AddressesContent() {
                     type="text"
                     value={form.label}
                     onChange={(event) =>
-                      handleChange(
-                        "label",
-                        event.target.value
-                      )
+                      handleChange("label", event.target.value)
                     }
                     placeholder="e.g. Home"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
-                {/* Address */}
                 <div>
                   <label
                     htmlFor="addressLine"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="mb-1.5 block text-xs font-semibold text-slate-700"
                   >
-                    Address
+                    Street / Building / Estate
                   </label>
 
                   <input
@@ -343,87 +325,63 @@ function AddressesContent() {
                     type="text"
                     value={form.addressLine}
                     onChange={(event) =>
-                      handleChange(
-                        "addressLine",
-                        event.target.value
-                      )
+                      handleChange("addressLine", event.target.value)
                     }
                     placeholder="Street, building or estate"
                     required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
-                {/* City */}
-                <div>
-                  <label
-                    htmlFor="city"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
-                    City / Town
-                  </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="min-w-0">
+                    <label
+                      htmlFor="city"
+                      className="mb-1.5 block text-xs font-semibold text-slate-700"
+                    >
+                      City / Town
+                    </label>
 
-                  <input
-                    id="city"
-                    type="text"
-                    value={form.city}
-                    onChange={(event) =>
-                      handleChange(
-                        "city",
-                        event.target.value
-                      )
-                    }
-                    placeholder="e.g. Chuka"
-                    required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-
-                {/* County */}
-                <div>
-                  <label
-                    htmlFor="county"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
-                    County
-                  </label>
-
-                  <input
-                    id="county"
-                    type="text"
-                    value={form.county}
-                    onChange={(event) =>
-                      handleChange(
-                        "county",
-                        event.target.value
-                      )
-                    }
-                    placeholder="e.g. Tharaka-Nithi"
-                    required
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-
-                {/* Messages */}
-                {error && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {error}
+                    <input
+                      id="city"
+                      type="text"
+                      value={form.city}
+                      onChange={(event) =>
+                        handleChange("city", event.target.value)
+                      }
+                      placeholder="e.g. Chuka"
+                      required
+                      className="w-full min-w-0 border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    />
                   </div>
-                )}
 
-                {success && (
-                  <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                    {success}
+                  <div className="min-w-0">
+                    <label
+                      htmlFor="county"
+                      className="mb-1.5 block text-xs font-semibold text-slate-700"
+                    >
+                      County
+                    </label>
+
+                    <input
+                      id="county"
+                      type="text"
+                      value={form.county}
+                      onChange={(event) =>
+                        handleChange("county", event.target.value)
+                      }
+                      placeholder="e.g. Tharaka-Nithi"
+                      required
+                      className="w-full min-w-0 border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    />
                   </div>
-                )}
+                </div>
 
-                {/* Actions */}
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-
+                <div className="grid grid-cols-2 gap-2 pt-2">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="bg-[#061F35] px-3 py-3 text-xs font-bold text-white transition hover:bg-[#082B49] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {saving
                       ? "Saving..."
@@ -432,146 +390,126 @@ function AddressesContent() {
                         : "Add Address"}
                   </button>
 
-                  {editingId && (
+                  {editingId ? (
                     <button
                       type="button"
                       onClick={cancelEditing}
-                      className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
+                      disabled={saving}
+                      className="border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                     >
                       Cancel
                     </button>
+                  ) : (
+                    <div className="flex items-center justify-center border border-slate-100 bg-slate-50 px-2 text-center">
+                      <span className="text-[10px] text-slate-400">
+                        Saved for future bookings
+                      </span>
+                    </div>
                   )}
-
                 </div>
               </form>
             </section>
 
-            {/* =================================================
-                SAVED ADDRESSES
-            ================================================= */}
-
-            <section>
-
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
+            {/* Saved addresses */}
+            <section className="min-w-0">
+              <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
                     Saved Locations
                   </p>
 
-                  <h2 className="mt-2 text-xl font-bold text-[#061F35] sm:text-2xl">
+                  <h2 className="mt-1 text-lg font-bold text-[#061F35]">
                     Your addresses
                   </h2>
                 </div>
 
-                <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                <span className="shrink-0 border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700">
                   {addresses.length}{" "}
-                  {addresses.length === 1
-                    ? "address"
-                    : "addresses"}
+                  {addresses.length === 1 ? "address" : "addresses"}
                 </span>
               </div>
 
               {/* Loading */}
               {loading ? (
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-                  <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-
-                  <p className="text-sm text-slate-500">
+                <div className="flex min-h-40 flex-col items-center justify-center gap-3 border border-slate-200 bg-white p-6">
+                  <div className="h-6 w-6 animate-spin border-2 border-slate-200 border-t-blue-600" />
+                  <p className="text-xs text-slate-500">
                     Loading your addresses...
                   </p>
                 </div>
               ) : addresses.length === 0 ? (
-                /* Empty */
-                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm sm:p-10">
-
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl font-bold text-blue-600">
+                /* Empty state */
+                <div className="border border-dashed border-slate-300 bg-white px-4 py-10 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center border border-blue-100 bg-blue-50 text-xl font-bold text-blue-600">
                     +
                   </div>
 
-                  <h3 className="mt-5 text-lg font-bold text-[#061F35]">
+                  <h3 className="mt-4 text-sm font-bold text-[#061F35]">
                     No saved addresses
                   </h3>
 
-                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                    Add your first service location
-                    using the form.
+                  <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-slate-500">
+                    Add your first service location using the form.
                   </p>
-
                 </div>
               ) : (
-                /* Address cards */
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-
+                /* Two-column address cards on mobile */
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                   {addresses.map((address) => (
                     <article
                       key={address.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                      className="flex min-w-0 flex-col border border-slate-200 bg-white p-3 shadow-sm transition hover:border-blue-200 sm:p-4"
                     >
-
-                      {/* Card header */}
-                      <div className="flex items-start gap-3">
-
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-lg text-blue-600">
+                      <div className="flex min-w-0 items-start gap-2">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-blue-50 text-base text-blue-600 sm:h-10 sm:w-10">
                           ⌂
                         </div>
 
-                        <div className="min-w-0">
-                          <h3 className="truncate font-bold text-[#061F35]">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="break-words text-xs font-bold leading-snug text-[#061F35] sm:text-sm">
                             {address.label}
                           </h3>
 
-                          <p className="mt-0.5 text-xs text-slate-400">
+                          <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px]">
                             Service location
                           </p>
                         </div>
-
                       </div>
 
-                      {/* Address */}
-                      <div className="mt-5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                        <p>{address.addressLine}</p>
+                      <div className="mt-3 min-w-0 flex-1 border-t border-slate-100 pt-3">
+                        <p className="break-words text-[10px] leading-relaxed text-slate-600 sm:text-xs">
+                          {address.addressLine}
+                        </p>
 
-                        <p>
-                          {address.city},{" "}
-                          {address.county}
+                        <p className="mt-1 break-words text-[10px] font-medium leading-relaxed text-slate-700 sm:text-xs">
+                          {address.city}, {address.county}
                         </p>
                       </div>
 
-                      {/* Actions */}
-                      <div className="mt-4 flex gap-2">
-
+                      <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                         <button
                           type="button"
-                          onClick={() =>
-                            startEditing(address)
-                          }
-                          className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => startEditing(address)}
+                          className="border border-slate-200 px-2 py-2 text-[10px] font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 sm:text-xs"
                         >
                           Edit
                         </button>
 
                         <button
                           type="button"
-                          onClick={() =>
-                            handleDelete(address.id)
-                          }
-                          disabled={
-                            deletingId === address.id
-                          }
-                          className="flex-1 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          onClick={() => handleDelete(address.id)}
+                          disabled={deletingId === address.id}
+                          className="border border-red-200 px-2 py-2 text-[10px] font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 sm:text-xs"
                         >
                           {deletingId === address.id
                             ? "Deleting..."
                             : "Delete"}
                         </button>
-
                       </div>
                     </article>
                   ))}
-
                 </div>
               )}
-
             </section>
           </div>
         </div>
@@ -585,15 +523,12 @@ export default function AddressesPage() {
     <Suspense
       fallback={
         <DashboardShell>
-          <main className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-6xl">
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-                <div className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-
-                <p className="text-sm text-slate-500">
-                  Loading addresses...
-                </p>
-              </div>
+          <main className="min-h-full bg-slate-50 px-3 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto flex min-h-40 max-w-6xl flex-col items-center justify-center gap-3 border border-slate-200 bg-white p-8">
+              <div className="h-6 w-6 animate-spin border-2 border-slate-200 border-t-blue-600" />
+              <p className="text-xs text-slate-500">
+                Loading addresses...
+              </p>
             </div>
           </main>
         </DashboardShell>

@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 import DashboardShell from "@/components/dashboard/DashboardShell";
 
@@ -16,42 +17,19 @@ import type { Quote } from "@/types/quote";
 
 export default function AdminQuoteDetailsPage() {
   const params = useParams();
-  const router = useRouter();
-
   const quoteId = String(params.id);
 
-  const [quote, setQuote] =
-    useState<Quote | null>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [saving, setSaving] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState("");
-
-  const [estimatedAmount, setEstimatedAmount] =
-    useState("");
-
-  const [finalAmount, setFinalAmount] =
-    useState("");
-
-  const [description, setDescription] =
-    useState("");
-
-  const [validUntil, setValidUntil] =
-    useState("");
-
-  /*
-  |--------------------------------------------------------------------------
-  | Load quote
-  |--------------------------------------------------------------------------
-  */
+  const [estimatedAmount, setEstimatedAmount] = useState("");
+  const [finalAmount, setFinalAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [validUntil, setValidUntil] = useState("");
 
   useEffect(() => {
     async function loadQuote() {
@@ -59,8 +37,7 @@ export default function AdminQuoteDetailsPage() {
         setLoading(true);
         setError("");
 
-        const data =
-          await getAdminQuote(quoteId);
+        const data = await getAdminQuote(quoteId);
 
         setQuote(data);
 
@@ -76,14 +53,10 @@ export default function AdminQuoteDetailsPage() {
             : ""
         );
 
-        setDescription(
-          data.description ?? ""
-        );
+        setDescription(data.description ?? "");
 
         if (data.validUntil) {
-          setValidUntil(
-            data.validUntil.slice(0, 10)
-          );
+          setValidUntil(data.validUntil.slice(0, 10));
         }
       } catch (err) {
         setError(
@@ -101,12 +74,6 @@ export default function AdminQuoteDetailsPage() {
     }
   }, [quoteId]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Save quote
-  |--------------------------------------------------------------------------
-  */
-
   async function handleSave() {
     try {
       setSaving(true);
@@ -117,9 +84,7 @@ export default function AdminQuoteDetailsPage() {
         estimatedAmount &&
         Number(estimatedAmount) <= 0
       ) {
-        setError(
-          "Estimated amount must be greater than zero."
-        );
+        setError("Estimated amount must be greater than zero.");
         return;
       }
 
@@ -127,44 +92,28 @@ export default function AdminQuoteDetailsPage() {
         finalAmount &&
         Number(finalAmount) <= 0
       ) {
-        setError(
-          "Final amount must be greater than zero."
-        );
+        setError("Final amount must be greater than zero.");
         return;
       }
 
-      const updated =
-        await updateAdminQuote(
-          quoteId,
-          {
-            estimatedAmount:
-              estimatedAmount
-                ? Number(estimatedAmount)
-                : undefined,
+      const updated = await updateAdminQuote(quoteId, {
+        estimatedAmount: estimatedAmount
+          ? Number(estimatedAmount)
+          : undefined,
 
-            finalAmount:
-              finalAmount
-                ? Number(finalAmount)
-                : undefined,
+        finalAmount: finalAmount
+          ? Number(finalAmount)
+          : undefined,
 
-            description:
-              description.trim() ||
-              undefined,
+        description: description.trim() || undefined,
 
-            validUntil:
-              validUntil
-                ? new Date(
-                    `${validUntil}T23:59:59`
-                  ).toISOString()
-                : undefined,
-          }
-        );
+        validUntil: validUntil
+          ? new Date(`${validUntil}T23:59:59`).toISOString()
+          : undefined,
+      });
 
       setQuote(updated);
-
-      setSuccess(
-        "Quote saved successfully."
-      );
+      setSuccess("Quote saved successfully.");
     } catch (err) {
       setError(
         err instanceof Error
@@ -175,12 +124,6 @@ export default function AdminQuoteDetailsPage() {
       setSaving(false);
     }
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Send quote
-  |--------------------------------------------------------------------------
-  */
 
   async function handleSend() {
     try {
@@ -199,9 +142,7 @@ export default function AdminQuoteDetailsPage() {
         estimatedAmount &&
         Number(estimatedAmount) <= 0
       ) {
-        setError(
-          "Estimated amount must be greater than zero."
-        );
+        setError("Estimated amount must be greater than zero.");
         return;
       }
 
@@ -209,58 +150,32 @@ export default function AdminQuoteDetailsPage() {
         finalAmount &&
         Number(finalAmount) <= 0
       ) {
-        setError(
-          "Final amount must be greater than zero."
-        );
+        setError("Final amount must be greater than zero.");
         return;
       }
 
-      /*
-      |--------------------------------------------------------------------------
-      | Save the latest quote information first
-      |--------------------------------------------------------------------------
-      */
+      // Save the latest quote information first.
+      await updateAdminQuote(quoteId, {
+        estimatedAmount: estimatedAmount
+          ? Number(estimatedAmount)
+          : undefined,
 
-      await updateAdminQuote(
-        quoteId,
-        {
-          estimatedAmount:
-            estimatedAmount
-              ? Number(estimatedAmount)
-              : undefined,
+        finalAmount: finalAmount
+          ? Number(finalAmount)
+          : undefined,
 
-          finalAmount:
-            finalAmount
-              ? Number(finalAmount)
-              : undefined,
+        description: description.trim() || undefined,
 
-          description:
-            description.trim() ||
-            undefined,
+        validUntil: validUntil
+          ? new Date(`${validUntil}T23:59:59`).toISOString()
+          : undefined,
+      });
 
-          validUntil:
-            validUntil
-              ? new Date(
-                  `${validUntil}T23:59:59`
-                ).toISOString()
-              : undefined,
-        }
-      );
-
-      /*
-      |--------------------------------------------------------------------------
-      | Send quote
-      |--------------------------------------------------------------------------
-      */
-
-      const sentQuote =
-        await sendAdminQuote(quoteId);
+      // Send the quote.
+      const sentQuote = await sendAdminQuote(quoteId);
 
       setQuote(sentQuote);
-
-      setSuccess(
-        "Quote sent successfully to the customer."
-      );
+      setSuccess("Quote sent successfully to the customer.");
     } catch (err) {
       setError(
         err instanceof Error
@@ -272,19 +187,13 @@ export default function AdminQuoteDetailsPage() {
     }
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Loading
-  |--------------------------------------------------------------------------
-  */
-
   if (loading) {
     return (
       <DashboardShell>
-        <div className="min-h-screen bg-slate-50">
-          <main className="mx-auto max-w-5xl px-6 py-16">
-            <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <p className="text-slate-600">
+        <div className="min-h-screen bg-slate-50 px-3 py-6 sm:px-6 sm:py-10">
+          <main className="mx-auto max-w-6xl">
+            <div className="border border-slate-200 bg-white p-8 text-center shadow-sm">
+              <p className="text-sm font-medium text-slate-600">
                 Loading quote...
               </p>
             </div>
@@ -294,24 +203,18 @@ export default function AdminQuoteDetailsPage() {
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Error
-  |--------------------------------------------------------------------------
-  */
-
   if (error && !quote) {
     return (
       <DashboardShell>
-        <div className="min-h-screen bg-slate-50">
-          <main className="mx-auto max-w-5xl px-6 py-16">
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <div className="min-h-screen bg-slate-50 px-3 py-6 sm:px-6 sm:py-10">
+          <main className="mx-auto max-w-6xl">
+            <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {error}
             </div>
 
             <Link
               href="/admin/quotes"
-              className="mt-6 inline-block font-semibold text-[#061F35]"
+              className="mt-5 inline-block text-sm font-semibold text-[#061F35] hover:underline"
             >
               ← Back to Quotes
             </Link>
@@ -325,8 +228,7 @@ export default function AdminQuoteDetailsPage() {
     return null;
   }
 
-  const booking =
-    quote.booking;
+  const booking = quote.booking;
 
   const isLocked =
     quote.status === "SENT" ||
@@ -334,242 +236,221 @@ export default function AdminQuoteDetailsPage() {
     quote.status === "REJECTED" ||
     quote.status === "EXPIRED";
 
+  const statusStyles: Record<string, string> = {
+    DRAFT: "bg-slate-100 text-slate-700",
+    SENT: "bg-blue-100 text-blue-700",
+    ACCEPTED: "bg-emerald-100 text-emerald-700",
+    REJECTED: "bg-red-100 text-red-700",
+    EXPIRED: "bg-amber-100 text-amber-800",
+  };
+
   return (
     <DashboardShell>
       <div className="min-h-screen bg-slate-50">
-        <main className="mx-auto max-w-6xl px-6 py-12">
-          {/* Header */}
+        <main className="mx-auto max-w-6xl space-y-5 px-3 py-4 pb-24 sm:space-y-6 sm:px-6 sm:py-7 lg:pb-10">
 
-          <div className="mb-8">
+          {/* Page heading */}
+          <section className="bg-[#061F35] px-4 py-4 text-white sm:px-6 sm:py-5">
             <Link
               href="/admin/quotes"
-              className="text-sm font-semibold text-blue-600 hover:underline"
+              className="mb-3 inline-flex text-xs font-medium text-blue-200 transition hover:text-white"
             >
               ← Back to Quote Requests
             </Link>
 
-            <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-200">
                   HomeServe Admin
                 </p>
 
-                <h1 className="mt-1 text-3xl font-bold text-[#061F35]">
+                <h1 className="mt-1 text-xl font-bold sm:text-2xl">
                   Review Quote
                 </h1>
 
-                <p className="mt-2 text-slate-600">
+                <p className="mt-1 text-xs text-slate-300 sm:text-sm">
                   Booking{" "}
-                  <span className="font-mono">
+                  <span className="font-mono font-semibold text-white">
                     {booking?.bookingNumber}
                   </span>
                 </p>
               </div>
 
-              <span className="inline-flex w-fit rounded-full bg-yellow-100 px-4 py-2 text-sm font-semibold text-yellow-800">
+              <span
+                className={`inline-flex items-center px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide ${
+                  statusStyles[quote.status] ??
+                  "bg-slate-100 text-slate-700"
+                }`}
+              >
                 {quote.status}
               </span>
             </div>
-          </div>
+          </section>
 
+          {/* Feedback messages */}
           {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-              {error}
+            <div className="flex items-start justify-between gap-3 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p>{error}</p>
+              <button
+                type="button"
+                onClick={() => setError("")}
+                className="font-bold"
+                aria-label="Dismiss error"
+              >
+                ×
+              </button>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
-              {success}
+            <div className="flex items-start justify-between gap-3 border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <p>{success}</p>
+              <button
+                type="button"
+                onClick={() => setSuccess("")}
+                className="font-bold"
+                aria-label="Dismiss success message"
+              >
+                ×
+              </button>
             </div>
           )}
 
-          <div className="grid gap-8 lg:grid-cols-3">
-            {/* Customer / Booking Information */}
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
 
-            <div className="space-y-6 lg:col-span-1">
-              <section className="rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-[#061F35]">
-                  Customer
-                </h2>
+            {/* Customer and booking information */}
+            <div className="space-y-4 lg:col-span-1">
 
-                <div className="mt-5 space-y-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Name
-                    </p>
+              {/* Customer */}
+              <section className="border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <SectionHeading title="Customer" />
 
-                    <p className="font-medium text-slate-800">
-                      {booking?.user?.name ??
-                        "Unknown"}
-                    </p>
+                <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4">
+                  <Info
+                    label="Name"
+                    value={booking?.user?.name ?? "Unknown"}
+                  />
+
+                  <Info
+                    label="Phone"
+                    value={booking?.user?.phone ?? "Not provided"}
+                  />
+
+                  <div className="col-span-2 min-w-0">
+                    <Info
+                      label="Email"
+                      value={booking?.user?.email ?? "No email"}
+                    />
                   </div>
-
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Email
-                    </p>
-
-                    <p className="break-all text-slate-700">
-                      {booking?.user?.email ??
-                        "No email"}
-                    </p>
-                  </div>
-
-                  {booking?.user?.phone && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase text-slate-500">
-                        Phone
-                      </p>
-
-                      <p className="text-slate-700">
-                        {booking.user.phone}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </section>
 
-              <section className="rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-[#061F35]">
-                  Booking
-                </h2>
+              {/* Booking */}
+              <section className="border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <SectionHeading title="Booking" />
 
-                <div className="mt-5 space-y-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Service
-                    </p>
+                <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4">
+                  <Info
+                    label="Service"
+                    value={booking?.service?.name ?? "-"}
+                  />
 
-                    <p className="font-medium text-slate-800">
-                      {booking?.service?.name}
-                    </p>
-                  </div>
+                  <Info
+                    label="Category"
+                    value={booking?.service?.category ?? "-"}
+                  />
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Category
-                    </p>
-
-                    <p className="text-slate-700">
-                      {booking?.service?.category}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Date
-                    </p>
-
-                    <p className="text-slate-700">
-                      {booking?.scheduledDate
+                  <Info
+                    label="Date"
+                    value={
+                      booking?.scheduledDate
                         ? new Date(
                             booking.scheduledDate
-                          ).toLocaleDateString(
-                            "en-KE",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )
-                        : "-"}
-                    </p>
-                  </div>
+                          ).toLocaleDateString("en-KE", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
+                        : "-"
+                    }
+                  />
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-slate-500">
-                      Time
-                    </p>
-
-                    <p className="text-slate-700">
-                      {booking?.scheduledTime ??
-                        "-"}
-                    </p>
-                  </div>
+                  <Info
+                    label="Time"
+                    value={booking?.scheduledTime ?? "-"}
+                  />
                 </div>
               </section>
 
+              {/* Service address */}
               {booking?.address && (
-                <section className="rounded-2xl bg-white p-6 shadow-sm">
-                  <h2 className="text-lg font-bold text-[#061F35]">
-                    Service Address
-                  </h2>
+                <section className="border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                  <SectionHeading title="Service Address" />
 
-                  <div className="mt-5">
-                    <p className="font-medium text-slate-800">
-                      {booking.address.label}
-                    </p>
+                  <div className="mt-4 space-y-2">
+                    <Info
+                      label="Address Label"
+                      value={booking.address.label}
+                    />
 
-                    <p className="mt-1 text-slate-600">
-                      {booking.address.addressLine}
-                    </p>
+                    <Info
+                      label="Street / Area"
+                      value={booking.address.addressLine}
+                    />
 
-                    <p className="text-slate-600">
-                      {booking.address.city},{" "}
-                      {booking.address.county}
-                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Info
+                        label="City"
+                        value={booking.address.city}
+                      />
+
+                      <Info
+                        label="County"
+                        value={booking.address.county}
+                      />
+                    </div>
                   </div>
                 </section>
               )}
             </div>
 
-            {/* Quote + Request Details */}
+            {/* Request details and quote editor */}
+            <div className="space-y-5 lg:col-span-2">
 
-            <div className="space-y-6 lg:col-span-2">
-              {/* Request details */}
-
-              <section className="rounded-2xl bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-[#061F35]">
-                  Customer Requirements
-                </h2>
+              {/* Customer requirements */}
+              <section className="border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <SectionHeading title="Customer Requirements" />
 
                 {booking.cleaningRequest && (
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-5">
                     <Info
                       label="Property Type"
-                      value={
-                        booking
-                          .cleaningRequest
-                          .propertyType
-                      }
+                      value={booking.cleaningRequest.propertyType}
                     />
 
                     <Info
                       label="Cleaning Type"
-                      value={
-                        booking
-                          .cleaningRequest
-                          .cleaningType
-                      }
+                      value={booking.cleaningRequest.cleaningType}
                     />
 
                     <Info
                       label="Bedrooms"
                       value={String(
-                        booking
-                          .cleaningRequest
-                          .bedrooms ??
-                          "-"
+                        booking.cleaningRequest.bedrooms ?? "-"
                       )}
                     />
 
                     <Info
                       label="Bathrooms"
                       value={String(
-                        booking
-                          .cleaningRequest
-                          .bathrooms ??
-                          "-"
+                        booking.cleaningRequest.bathrooms ?? "-"
                       )}
                     />
 
                     <Info
                       label="Area"
                       value={
-                        booking
-                          .cleaningRequest
-                          .squareMeters
+                        booking.cleaningRequest.squareMeters
                           ? `${booking.cleaningRequest.squareMeters} m²`
                           : "-"
                       }
@@ -578,9 +459,7 @@ export default function AdminQuoteDetailsPage() {
                     <Info
                       label="Additional Requirements"
                       value={
-                        booking
-                          .cleaningRequest
-                          .additionalRequirements ??
+                        booking.cleaningRequest.additionalRequirements ??
                         "None"
                       }
                     />
@@ -588,114 +467,83 @@ export default function AdminQuoteDetailsPage() {
                 )}
 
                 {booking.movingRequest && (
-                  <div className="mt-5 space-y-4">
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-5">
                     <Info
                       label="Property Type"
-                      value={
-                        booking
-                          .movingRequest
-                          .propertyType
-                      }
-                    />
-
-                    <Info
-                      label="Pickup"
-                      value={
-                        booking
-                          .movingRequest
-                          .pickupAddress
-                      }
-                    />
-
-                    <Info
-                      label="Destination"
-                      value={
-                        booking
-                          .movingRequest
-                          .destinationAddress
-                      }
+                      value={booking.movingRequest.propertyType}
                     />
 
                     <Info
                       label="Truck Size"
-                      value={
-                        booking
-                          .movingRequest
-                          .truckSize ??
-                        "-"
-                      }
+                      value={booking.movingRequest.truckSize ?? "-"}
                     />
+
+                    <div className="col-span-2">
+                      <Info
+                        label="Pickup"
+                        value={booking.movingRequest.pickupAddress}
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <Info
+                        label="Destination"
+                        value={booking.movingRequest.destinationAddress}
+                      />
+                    </div>
 
                     <Info
                       label="Number of Movers"
                       value={String(
-                        booking
-                          .movingRequest
-                          .numberOfMovers ??
-                          "-"
+                        booking.movingRequest.numberOfMovers ?? "-"
                       )}
                     />
 
                     <Info
                       label="Packing Required"
                       value={
-                        booking
-                          .movingRequest
-                          .packingRequired
+                        booking.movingRequest.packingRequired
                           ? "Yes"
                           : "No"
                       }
                     />
 
-                    <Info
-                      label="Special Items"
-                      value={
-                        booking
-                          .movingRequest
-                          .specialItems ??
-                        "None"
-                      }
-                    />
+                    <div className="col-span-2">
+                      <Info
+                        label="Special Items"
+                        value={
+                          booking.movingRequest.specialItems ?? "None"
+                        }
+                      />
+                    </div>
                   </div>
                 )}
 
                 {booking.electricalRequest && (
-                  <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-5">
                     <Info
                       label="Property Type"
-                      value={
-                        booking
-                          .electricalRequest
-                          .propertyType
-                      }
+                      value={booking.electricalRequest.propertyType}
                     />
 
                     <Info
                       label="Floors"
                       value={String(
-                        booking
-                          .electricalRequest
-                          .numberOfFloors ??
-                          "-"
+                        booking.electricalRequest.numberOfFloors ?? "-"
                       )}
                     />
 
                     <Info
                       label="Bedrooms"
                       value={String(
-                        booking
-                          .electricalRequest
-                          .bedrooms ??
-                          "-"
+                        booking.electricalRequest.bedrooms ?? "-"
                       )}
                     />
 
                     <Info
                       label="New Installation"
                       value={
-                        booking
-                          .electricalRequest
-                          .newInstallation
+                        booking.electricalRequest.newInstallation
                           ? "Yes"
                           : "No"
                       }
@@ -704,9 +552,7 @@ export default function AdminQuoteDetailsPage() {
                     <Info
                       label="Rewiring"
                       value={
-                        booking
-                          .electricalRequest
-                          .rewiring
+                        booking.electricalRequest.rewiring
                           ? "Yes"
                           : "No"
                       }
@@ -715,64 +561,52 @@ export default function AdminQuoteDetailsPage() {
                     <Info
                       label="Sockets"
                       value={String(
-                        booking
-                          .electricalRequest
-                          .numberOfSockets ??
-                          "-"
+                        booking.electricalRequest.numberOfSockets ?? "-"
                       )}
                     />
 
                     <Info
                       label="Lights"
                       value={String(
-                        booking
-                          .electricalRequest
-                          .numberOfLights ??
-                          "-"
+                        booking.electricalRequest.numberOfLights ?? "-"
                       )}
                     />
 
                     <Info
                       label="Distribution Board"
                       value={
-                        booking
-                          .electricalRequest
-                          .distributionBoard
+                        booking.electricalRequest.distributionBoard
                           ? "Yes"
                           : "No"
                       }
                     />
 
-                    <Info
-                      label="Additional Requirements"
-                      value={
-                        booking
-                          .electricalRequest
-                          .additionalRequirements ??
-                        "None"
-                      }
-                    />
+                    <div className="col-span-2">
+                      <Info
+                        label="Additional Requirements"
+                        value={
+                          booking.electricalRequest.additionalRequirements ??
+                          "None"
+                        }
+                      />
+                    </div>
                   </div>
                 )}
               </section>
 
               {/* Quote editor */}
+              <section className="border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <div className="mb-5">
+                  <SectionHeading title="Quote Pricing" />
 
-              <section className="rounded-2xl bg-white p-6 shadow-sm">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-[#061F35]">
-                    Quote Pricing
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Set the amount and information
-                    the customer will receive.
+                  <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                    Set the amount and information the customer will receive.
                   </p>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                <div className="grid grid-cols-2 gap-3 sm:gap-5">
+                  <div className="min-w-0">
+                    <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
                       Estimated Amount (KSh)
                     </label>
 
@@ -782,18 +616,16 @@ export default function AdminQuoteDetailsPage() {
                       step="0.01"
                       value={estimatedAmount}
                       onChange={(e) =>
-                        setEstimatedAmount(
-                          e.target.value
-                        )
+                        setEstimatedAmount(e.target.value)
                       }
                       disabled={isLocked}
                       placeholder="e.g. 15000"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="w-full min-w-0 border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-[#061F35] focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500 sm:px-4 sm:py-3"
                     />
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  <div className="min-w-0">
+                    <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
                       Final Amount (KSh)
                     </label>
 
@@ -803,43 +635,41 @@ export default function AdminQuoteDetailsPage() {
                       step="0.01"
                       value={finalAmount}
                       onChange={(e) =>
-                        setFinalAmount(
-                          e.target.value
-                        )
+                        setFinalAmount(e.target.value)
                       }
                       disabled={isLocked}
                       placeholder="e.g. 18000"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500"
+                      className="w-full min-w-0 border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-[#061F35] focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500 sm:px-4 sm:py-3"
                     />
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
-                    Quote Description
-                  </label>
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <label className="block text-xs font-semibold text-slate-700 sm:text-sm">
+                      Quote Description
+                    </label>
+
+                    <span className="text-[10px] text-slate-400 sm:text-xs">
+                      {description.length}/2000
+                    </span>
+                  </div>
 
                   <textarea
                     value={description}
                     onChange={(e) =>
-                      setDescription(
-                        e.target.value
-                      )
+                      setDescription(e.target.value)
                     }
                     disabled={isLocked}
                     rows={5}
                     maxLength={2000}
                     placeholder="Explain the work included, materials, labor, or any other important information..."
-                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500"
+                    className="w-full resize-none border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-[#061F35] focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500 sm:px-4"
                   />
-
-                  <p className="mt-1 text-right text-xs text-slate-400">
-                    {description.length}/2000
-                  </p>
                 </div>
 
-                <div className="mt-6">
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                <div className="mt-5">
+                  <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
                     Quote Valid Until
                   </label>
 
@@ -847,47 +677,39 @@ export default function AdminQuoteDetailsPage() {
                     type="date"
                     value={validUntil}
                     onChange={(e) =>
-                      setValidUntil(
-                        e.target.value
-                      )
+                      setValidUntil(e.target.value)
                     }
                     disabled={isLocked}
-                    className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500"
+                    className="w-full border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-[#061F35] focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500 sm:w-auto sm:px-4 sm:py-3"
                   />
                 </div>
 
                 {!isLocked && (
-                  <div className="mt-8 flex flex-wrap gap-3">
+                  <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
                     <button
                       type="button"
                       onClick={handleSave}
                       disabled={saving}
-                      className="rounded-xl bg-[#061F35] px-6 py-3 font-semibold text-white transition hover:bg-[#082B49] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="bg-[#061F35] px-3 py-3 text-xs font-bold text-white transition hover:bg-[#082B49] disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-36 sm:px-6 sm:text-sm"
                     >
-                      {saving
-                        ? "Saving..."
-                        : "Save Quote"}
+                      {saving ? "Saving..." : "Save Quote"}
                     </button>
 
                     <button
                       type="button"
                       onClick={handleSend}
                       disabled={saving}
-                      className="rounded-xl border border-blue-600 px-6 py-3 font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="border border-[#061F35] px-3 py-3 text-xs font-bold text-[#061F35] transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-36 sm:px-6 sm:text-sm"
                     >
-                      {saving
-                        ? "Sending..."
-                        : "Send Quote"}
+                      {saving ? "Sending..." : "Send Quote"}
                     </button>
                   </div>
                 )}
 
                 {isLocked && (
-                  <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                  <div className="mt-5 border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-600 sm:text-sm">
                     This quote is{" "}
-                    <strong>
-                      {quote.status.toLowerCase()}
-                    </strong>{" "}
+                    <strong>{quote.status.toLowerCase()}</strong>{" "}
                     and can no longer be modified.
                   </div>
                 )}
@@ -900,11 +722,13 @@ export default function AdminQuoteDetailsPage() {
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| Info component
-|--------------------------------------------------------------------------
-*/
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <h2 className="border-b border-slate-100 pb-3 text-sm font-bold text-[#061F35] sm:text-base">
+      {title}
+    </h2>
+  );
+}
 
 function Info({
   label,
@@ -914,12 +738,12 @@ function Info({
   value: string;
 }) {
   return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className="min-w-0">
+      <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400 sm:text-[10px]">
         {label}
       </p>
 
-      <p className="mt-1 whitespace-pre-wrap text-sm text-slate-800">
+      <p className="mt-1 break-words whitespace-pre-wrap text-xs font-medium leading-relaxed text-slate-800 sm:text-sm">
         {value}
       </p>
     </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,6 +7,7 @@ import { useAuth } from "../AuthProvider";
 
 import DashboardHeader from "./DashboardHeader";
 import DashboardSidebar from "./DashboardSidebar";
+import BottomNavigation from "./BottomNavigation";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -28,8 +30,8 @@ export default function DashboardShell({
     }
   }, [loading, user]);
 
-  // Prevent the page behind the mobile
-  // sidebar from scrolling.
+  // Prevent background scrolling when
+  // the mobile sidebar is open.
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
@@ -61,33 +63,23 @@ export default function DashboardShell({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen flex-col overflow-hidden bg-white lg:flex-row">
 
-      {/* =====================================================
-          DESKTOP SIDEBAR
-      ===================================================== */}
+      {/* DESKTOP SIDEBAR */}
 
       <div className="hidden h-screen shrink-0 lg:block">
         <DashboardSidebar />
       </div>
 
-      {/* =====================================================
-          MOBILE SIDEBAR
-      ===================================================== */}
+      {/* MOBILE SIDEBAR */}
 
       {mobileOpen && (
         <div className="fixed inset-0 z-[100] lg:hidden">
 
-          {/* =================================================
-              CLICK OUTSIDE TO CLOSE
-          ================================================= */}
-
           <button
             type="button"
             aria-label="Close navigation"
-            onClick={() =>
-              setMobileOpen(false)
-            }
+            onClick={() => setMobileOpen(false)}
             className="
               absolute
               inset-0
@@ -96,36 +88,33 @@ export default function DashboardShell({
             "
           />
 
-          {/* =================================================
-              SIDEBAR
-          ================================================= */}
-
           <div className="relative z-10 h-full w-64">
             <DashboardSidebar
-              onNavigate={() =>
-                setMobileOpen(false)
-              }
+              onNavigate={() => setMobileOpen(false)}
             />
           </div>
-
         </div>
       )}
 
-      {/* =====================================================
-          MAIN APPLICATION
-      ===================================================== */}
+      {/* MAIN APPLICATION */}
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
 
         <DashboardHeader
-          onMenuClick={() =>
-            setMobileOpen(true)
-          }
+          onMenuClick={() => setMobileOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto bg-white">
+        {/* PAGE CONTENT */}
+
+        <main className="min-h-0 flex-1 overflow-y-auto bg-white pb-20 lg:pb-0">
           {children}
         </main>
+
+        {/* MOBILE BOTTOM NAVIGATION */}
+
+        <BottomNavigation
+          onMoreClick={() => setMobileOpen(true)}
+        />
 
       </div>
     </div>

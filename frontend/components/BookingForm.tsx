@@ -1,15 +1,12 @@
+
 "use client";
 
-import {
-  FormEvent,
-  useEffect,
-  useState,
-} from "react";
+import type { FormEvent, ReactNode } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/components/AuthProvider";
-
 import type { Service } from "@/types/service";
 import type { Address } from "@/lib/addresses";
 import { getAddresses } from "@/lib/addresses";
@@ -23,10 +20,7 @@ import {
 
 import type { PricingResult } from "@/types/pricing";
 
-type BookingCategory =
-  | "cleaning"
-  | "moving"
-  | "electrical";
+type BookingCategory = "cleaning" | "moving" | "electrical";
 
 type BookingFormProps = {
   category: BookingCategory;
@@ -35,13 +29,13 @@ type BookingFormProps = {
 };
 
 const inputClass =
-  "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm font-medium text-[#061F35] placeholder:text-slate-500 placeholder:opacity-100 focus:border-[#0B72E7] focus:outline-none focus:ring-4 focus:ring-blue-100";
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-[#061F35] outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100";
 
 const selectClass =
-  "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm font-medium text-[#061F35] focus:border-[#0B72E7] focus:outline-none focus:ring-4 focus:ring-blue-100";
+  "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-[#061F35] outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100";
 
 const textareaClass =
-  "w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm font-medium text-[#061F35] placeholder:text-slate-500 placeholder:opacity-100 focus:border-[#0B72E7] focus:outline-none focus:ring-4 focus:ring-blue-100";
+  "w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-[#061F35] outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100";
 
 export default function BookingForm({
   category,
@@ -49,90 +43,56 @@ export default function BookingForm({
   returnTo,
 }: BookingFormProps) {
   const router = useRouter();
-
   const { user, loading: authLoading } = useAuth();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loadingAddresses, setLoadingAddresses] =
-    useState(true);
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [authRequired, setAuthRequired] =
-    useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
 
-  // Pricing
-  const [pricing, setPricing] =
-    useState<PricingResult | null>(null);
-  const [calculatingPrice, setCalculatingPrice] =
-    useState(false);
-  const [pricingError, setPricingError] =
-    useState("");
+  const [pricing, setPricing] = useState<PricingResult | null>(null);
+  const [calculatingPrice, setCalculatingPrice] = useState(false);
+  const [pricingError, setPricingError] = useState("");
 
   // Shared booking fields
   const [addressId, setAddressId] = useState("");
-  const [scheduledDate, setScheduledDate] =
-    useState("");
-  const [scheduledTime, setScheduledTime] =
-    useState("");
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
   const [notes, setNotes] = useState("");
 
   // Cleaning
-  const [cleaningPropertyType, setCleaningPropertyType] =
-    useState("");
+  const [cleaningPropertyType, setCleaningPropertyType] = useState("");
   const [bedrooms, setBedrooms] = useState("");
   const [bathrooms, setBathrooms] = useState("");
   const [squareMeters, setSquareMeters] = useState("");
   const [cleaningType, setCleaningType] = useState("");
-  const [cleaningRequirements, setCleaningRequirements] =
-    useState("");
+  const [cleaningRequirements, setCleaningRequirements] = useState("");
 
   // Moving
   const [pickupAddress, setPickupAddress] = useState("");
-  const [destinationAddress, setDestinationAddress] =
-    useState("");
-  const [movingPropertyType, setMovingPropertyType] =
-    useState("");
+  const [destinationAddress, setDestinationAddress] = useState("");
+  const [movingPropertyType, setMovingPropertyType] = useState("");
   const [truckSize, setTruckSize] = useState("");
-  const [numberOfMovers, setNumberOfMovers] =
-    useState("");
-  const [packingRequired, setPackingRequired] =
-    useState(false);
+  const [numberOfMovers, setNumberOfMovers] = useState("");
+  const [packingRequired, setPackingRequired] = useState(false);
   const [specialItems, setSpecialItems] = useState("");
-  const [estimatedDistanceKm, setEstimatedDistanceKm] =
-    useState("");
+  const [estimatedDistanceKm, setEstimatedDistanceKm] = useState("");
 
   // Electrical
-  const [
-    electricalPropertyType,
-    setElectricalPropertyType,
-  ] = useState("");
-  const [numberOfFloors, setNumberOfFloors] =
-    useState("");
-  const [electricalBedrooms, setElectricalBedrooms] =
-    useState("");
-  const [newInstallation, setNewInstallation] =
-    useState(false);
+  const [electricalPropertyType, setElectricalPropertyType] = useState("");
+  const [numberOfFloors, setNumberOfFloors] = useState("");
+  const [electricalBedrooms, setElectricalBedrooms] = useState("");
+  const [newInstallation, setNewInstallation] = useState(false);
   const [rewiring, setRewiring] = useState(false);
-  const [numberOfSockets, setNumberOfSockets] =
-    useState("");
-  const [numberOfLights, setNumberOfLights] =
-    useState("");
-  const [distributionBoard, setDistributionBoard] =
-    useState(false);
-  const [
-    electricalRequirements,
-    setElectricalRequirements,
-  ] = useState("");
+  const [numberOfSockets, setNumberOfSockets] = useState("");
+  const [numberOfLights, setNumberOfLights] = useState("");
+  const [distributionBoard, setDistributionBoard] = useState(false);
+  const [electricalRequirements, setElectricalRequirements] = useState("");
 
   useEffect(() => {
-    // Wait until AuthProvider has finished checking
-    // the current authentication session.
-    if (authLoading) {
-      return;
-    }
+    if (authLoading) return;
 
-    // If there is no authenticated user, show the
-    // existing login-required notice.
     if (!user) {
       setAuthRequired(true);
       setLoadingAddresses(false);
@@ -145,7 +105,6 @@ export default function BookingForm({
         setError("");
 
         const data = await getAddresses();
-
         setAddresses(data);
 
         if (data.length > 0) {
@@ -157,11 +116,7 @@ export default function BookingForm({
             ? err.message
             : "Failed to load your addresses.";
 
-        if (
-          message
-            .toLowerCase()
-            .includes("authentication required")
-        ) {
+        if (message.toLowerCase().includes("authentication required")) {
           setAuthRequired(true);
           return;
         }
@@ -175,12 +130,10 @@ export default function BookingForm({
     loadAddresses();
   }, [authLoading, user]);
 
-  function getBookingType():
-    | "INSTANT"
-    | "QUOTE_REQUEST" {
-    return service.pricingType === "QUOTE"
-      ? "QUOTE_REQUEST"
-      : "INSTANT";
+  const today = new Date().toLocaleDateString("en-CA");
+
+  function getBookingType(): "INSTANT" | "QUOTE_REQUEST" {
+    return service.pricingType === "QUOTE" ? "QUOTE_REQUEST" : "INSTANT";
   }
 
   async function handleCalculatePrice() {
@@ -195,18 +148,11 @@ export default function BookingForm({
         const result = await calculateCleaningPrice({
           serviceId: service.id,
           propertyType: cleaningPropertyType,
-          bedrooms: bedrooms
-            ? Number(bedrooms)
-            : undefined,
-          bathrooms: bathrooms
-            ? Number(bathrooms)
-            : undefined,
-          squareMeters: squareMeters
-            ? Number(squareMeters)
-            : undefined,
+          bedrooms: bedrooms ? Number(bedrooms) : undefined,
+          bathrooms: bathrooms ? Number(bathrooms) : undefined,
+          squareMeters: squareMeters ? Number(squareMeters) : undefined,
           cleaningType,
-          additionalRequirements:
-            cleaningRequirements || undefined,
+          additionalRequirements: cleaningRequirements || undefined,
         });
 
         setPricing(result);
@@ -219,16 +165,12 @@ export default function BookingForm({
           destinationAddress,
           propertyType: movingPropertyType,
           truckSize: truckSize || undefined,
-          numberOfMovers: numberOfMovers
-            ? Number(numberOfMovers)
-            : undefined,
+          numberOfMovers: numberOfMovers ? Number(numberOfMovers) : undefined,
           packingRequired,
-          estimatedDistanceKm:
-            estimatedDistanceKm
-              ? Number(estimatedDistanceKm)
-              : undefined,
-          specialItems:
-            specialItems || undefined,
+          estimatedDistanceKm: estimatedDistanceKm
+            ? Number(estimatedDistanceKm)
+            : undefined,
+          specialItems: specialItems || undefined,
         });
 
         setPricing(result);
@@ -238,38 +180,23 @@ export default function BookingForm({
         const result = await calculateElectricalPrice({
           serviceId: service.id,
           propertyType: electricalPropertyType,
-          numberOfFloors: numberOfFloors
-            ? Number(numberOfFloors)
-            : undefined,
-          bedrooms: electricalBedrooms
-            ? Number(electricalBedrooms)
-            : undefined,
+          numberOfFloors: numberOfFloors ? Number(numberOfFloors) : undefined,
+          bedrooms: electricalBedrooms ? Number(electricalBedrooms) : undefined,
           newInstallation,
           rewiring,
-          numberOfSockets: numberOfSockets
-            ? Number(numberOfSockets)
-            : undefined,
-          numberOfLights: numberOfLights
-            ? Number(numberOfLights)
-            : undefined,
+          numberOfSockets: numberOfSockets ? Number(numberOfSockets) : undefined,
+          numberOfLights: numberOfLights ? Number(numberOfLights) : undefined,
           distributionBoard,
-          additionalRequirements:
-            electricalRequirements || undefined,
+          additionalRequirements: electricalRequirements || undefined,
         });
 
         setPricing(result);
       }
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "Unable to calculate price.";
+        err instanceof Error ? err.message : "Unable to calculate price.";
 
-      if (
-        message
-          .toLowerCase()
-          .includes("authentication required")
-      ) {
+      if (message.toLowerCase().includes("authentication required")) {
         setAuthRequired(true);
         return;
       }
@@ -280,9 +207,7 @@ export default function BookingForm({
     }
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
@@ -292,19 +217,12 @@ export default function BookingForm({
     }
 
     if (!scheduledDate || !scheduledTime) {
-      setError(
-        "Please select your preferred date and time."
-      );
+      setError("Please select your preferred date and time.");
       return;
     }
 
-    if (
-      service.pricingType === "CALCULATED" &&
-      !pricing
-    ) {
-      setError(
-        "Please calculate your price before confirming the booking."
-      );
+    if (service.pricingType === "CALCULATED" && !pricing) {
+      setError("Please calculate your price before confirming the booking.");
       return;
     }
 
@@ -315,9 +233,7 @@ export default function BookingForm({
         serviceId: service.id,
         addressId,
         bookingType: getBookingType(),
-        scheduledDate: new Date(
-          `${scheduledDate}T00:00:00`
-        ).toISOString(),
+        scheduledDate: new Date(`${scheduledDate}T00:00:00`).toISOString(),
         scheduledTime,
         notes: notes || undefined,
       };
@@ -325,21 +241,13 @@ export default function BookingForm({
       if (category === "cleaning") {
         await createBooking({
           ...commonData,
-
           cleaningRequest: {
             propertyType: cleaningPropertyType,
-            bedrooms: bedrooms
-              ? Number(bedrooms)
-              : undefined,
-            bathrooms: bathrooms
-              ? Number(bathrooms)
-              : undefined,
-            squareMeters: squareMeters
-              ? Number(squareMeters)
-              : undefined,
+            bedrooms: bedrooms ? Number(bedrooms) : undefined,
+            bathrooms: bathrooms ? Number(bathrooms) : undefined,
+            squareMeters: squareMeters ? Number(squareMeters) : undefined,
             cleaningType,
-            additionalRequirements:
-              cleaningRequirements || undefined,
+            additionalRequirements: cleaningRequirements || undefined,
           },
         });
       }
@@ -347,22 +255,17 @@ export default function BookingForm({
       if (category === "moving") {
         await createBooking({
           ...commonData,
-
           movingRequest: {
             pickupAddress,
             destinationAddress,
             propertyType: movingPropertyType,
             truckSize: truckSize || undefined,
-            numberOfMovers: numberOfMovers
-              ? Number(numberOfMovers)
-              : undefined,
+            numberOfMovers: numberOfMovers ? Number(numberOfMovers) : undefined,
             packingRequired,
-            specialItems:
-              specialItems || undefined,
-            estimatedDistanceKm:
-              estimatedDistanceKm
-                ? Number(estimatedDistanceKm)
-                : undefined,
+            specialItems: specialItems || undefined,
+            estimatedDistanceKm: estimatedDistanceKm
+              ? Number(estimatedDistanceKm)
+              : undefined,
           },
         });
       }
@@ -370,27 +273,16 @@ export default function BookingForm({
       if (category === "electrical") {
         await createBooking({
           ...commonData,
-
           electricalRequest: {
-            propertyType:
-              electricalPropertyType,
-            numberOfFloors: numberOfFloors
-              ? Number(numberOfFloors)
-              : undefined,
-            bedrooms: electricalBedrooms
-              ? Number(electricalBedrooms)
-              : undefined,
+            propertyType: electricalPropertyType,
+            numberOfFloors: numberOfFloors ? Number(numberOfFloors) : undefined,
+            bedrooms: electricalBedrooms ? Number(electricalBedrooms) : undefined,
             newInstallation,
             rewiring,
-            numberOfSockets: numberOfSockets
-              ? Number(numberOfSockets)
-              : undefined,
-            numberOfLights: numberOfLights
-              ? Number(numberOfLights)
-              : undefined,
+            numberOfSockets: numberOfSockets ? Number(numberOfSockets) : undefined,
+            numberOfLights: numberOfLights ? Number(numberOfLights) : undefined,
             distributionBoard,
-            additionalRequirements:
-              electricalRequirements || undefined,
+            additionalRequirements: electricalRequirements || undefined,
           },
         });
       }
@@ -398,15 +290,9 @@ export default function BookingForm({
       router.push("/bookings");
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to create booking.";
+        err instanceof Error ? err.message : "Failed to create booking.";
 
-      if (
-        message
-          .toLowerCase()
-          .includes("authentication required")
-      ) {
+      if (message.toLowerCase().includes("authentication required")) {
         setAuthRequired(true);
         return;
       }
@@ -417,202 +303,206 @@ export default function BookingForm({
     }
   }
 
-  /*
-   * Authentication checkpoint
-   */
+  // Authentication checkpoint
   if (authRequired) {
     const currentPath =
       typeof window !== "undefined"
-        ? window.location.pathname +
-          window.location.search
+        ? window.location.pathname + window.location.search
         : `/book/${category}?service=${service.id}`;
 
-    const loginUrl =
-      `/login?redirect=${encodeURIComponent(
-        currentPath
-      )}`;
-
-    const registerUrl =
-      `/register?redirect=${encodeURIComponent(
-        currentPath
-      )}`;
+    const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+    const registerUrl = `/register?redirect=${encodeURIComponent(currentPath)}`;
 
     return (
-      <div className="min-h-screen bg-[#061F35] px-4 py-10 sm:px-6 lg:px-8">
-        <div className="flex min-h-[80vh] items-center justify-center">
-          <div className="w-full max-w-md rounded-3xl bg-white p-7 text-center shadow-2xl sm:p-9">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                className="h-7 w-7 text-[#0B72E7]"
-              >
-                <rect
-                  width="16"
-                  height="11"
-                  x="4"
-                  y="10"
-                  rx="2"
-                />
-
-                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-
-                <path d="M12 14v3" />
-              </svg>
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
+        <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+          <div className="bg-[#061F35] px-7 py-7 text-center text-white">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-200">
+              <LockIcon />
             </div>
-
-            <h1 className="mt-5 text-2xl font-bold text-[#061F35]">
-              Login required to continue
-            </h1>
-
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-600">
-              Before booking{" "}
-              <span className="font-semibold text-[#061F35]">
-                {service.name}
-              </span>
-              , please sign in to your HomeServe
-              account.
+            <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-blue-200">
+              HomeServe
             </p>
+            <h1 className="mt-2 text-2xl font-bold">Login required</h1>
+          </div>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Your account helps us securely manage
-              your booking, service address, and
-              appointment details.
+          <div className="p-7 text-center">
+            <p className="text-sm leading-6 text-slate-600">
+              Sign in to continue booking{" "}
+              <span className="font-bold text-[#061F35]">{service.name}</span>.
+              Your account helps us manage your service address and appointment.
             </p>
 
             <Link
               href={loginUrl}
-              className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#0B72E7] px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-[#095FBF]"
+              className="mt-6 flex w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700"
             >
               Continue to Login
             </Link>
 
             <p className="mt-5 text-sm text-slate-500">
-              Don't have a HomeServe account?{" "}
-              <Link
-                href={registerUrl}
-                className="font-semibold text-[#0B72E7] hover:underline"
-              >
-                Create an account
+              Don't have an account?{" "}
+              <Link href={registerUrl} className="font-bold text-blue-600 hover:underline">
+                Create one
               </Link>
             </p>
-
-            <div className="mt-7 border-t border-slate-100 pt-5">
-              <p className="text-xs leading-5 text-slate-400">
-                Your account information is used to
-                securely associate your booking with
-                you.
-              </p>
-            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  /*
-   * Authentication is still being checked.
-   * Do not attempt to load addresses or show the
-   * booking form until AuthProvider finishes.
-   */
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#061F35] px-4 py-10 sm:px-6 lg:px-8">
-        <div className="flex min-h-[80vh] items-center justify-center">
-          <div className="rounded-2xl bg-white px-6 py-5 text-center shadow-2xl">
-            <p className="text-sm font-medium text-[#061F35]">
-              Checking your account...
-            </p>
-          </div>
-        </div>
-      </div>
+      <LoadingScreen message="Checking your account..." />
     );
   }
 
+  const pricingLabel =
+    service.pricingType === "QUOTE"
+      ? "Quote required"
+      : service.pricingType === "CALCULATED"
+        ? "Calculated pricing"
+        : "Instant booking";
+
   return (
-    <div className="min-h-screen bg-[#061F35] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
+    <div className="min-h-screen bg-[#F3F6FA] px-3 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-5xl">
+        {/* Compact welcome banner */}
+        <div className="mb-5 overflow-hidden rounded-2xl bg-[#061F35] px-5 py-5 text-white shadow-lg sm:px-7">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-300">
+                Homeserve / Booking
+              </p>
+              <h1 className="mt-1 text-xl font-bold sm:text-2xl">
+                Let's get your service scheduled.
+              </h1>
+              <p className="mt-1 text-xs text-blue-100 sm:text-sm">
+                Complete the details below to arrange your service.
+              </p>
+            </div>
 
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-300">
-            HomeServe Booking
-          </p>
-
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            Book Your Service
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-            Provide a few details about your service
-            and choose your preferred schedule.
-          </p>
+            <div className="flex items-center gap-2 self-start rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-blue-100 sm:self-center">
+              <ShieldIcon />
+              Secure booking
+            </div>
+          </div>
         </div>
 
-        {/* Main Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-3xl bg-[#EAF6FF] p-5 shadow-2xl sm:p-8"
-        >
-          {/* Selected Service */}
-          <div className="mb-8 rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-              Selected Service
-            </p>
+        {/* Booking progress */}
+        <div className="mb-5 grid grid-cols-3 gap-2">
+          <ProgressItem number="01" label="Your details" active />
+          <ProgressItem number="02" label="Schedule" />
+          <ProgressItem number="03" label="Confirmation" />
+        </div>
 
-            <h2 className="mt-1 text-xl font-bold text-[#061F35]">
-              {service.name}
-            </h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Selected service */}
+          <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
+            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <ServiceIcon category={category} />
+                </div>
 
-            {service.description && (
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {service.description}
-              </p>
-            )}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
+                    Selected service
+                  </p>
+                  <h2 className="mt-1 text-lg font-bold text-[#061F35]">
+                    {service.name}
+                  </h2>
+                  {service.description && (
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
+                      {service.description}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                {service.pricingType === "QUOTE"
-                  ? "Quote Required"
-                  : service.pricingType === "CALCULATED"
-                  ? "Price Calculated"
-                  : "Instant Booking"}
-              </span>
-
-              {service.duration && (
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                  Approx. {service.duration} minutes
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                  {pricingLabel}
                 </span>
-              )}
+                {service.duration && (
+                  <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                    {service.duration} min
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Error */}
           {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-              {error}
+            <div
+              role="alert"
+              className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              <AlertIcon />
+              <span>{error}</span>
             </div>
           )}
 
           {/* Address */}
-          <section className="mb-8">
-            <SectionTitle
-              number="01"
-              title="Service Address"
-            />
-
+          <FormSection
+            number="01"
+            title="Where should we serve you?"
+            description="Choose the address where the service will take place."
+            tone="blue"
+          >
             {loadingAddresses ? (
-              <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-500">
+              <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+                <Spinner />
                 Loading your saved addresses...
               </div>
             ) : addresses.length === 0 ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <p className="text-sm text-amber-800">
-                  You don't have a saved address yet.
-                </p>
+                <div className="flex items-start gap-3">
+                  <div className="text-amber-600">
+                    <MapPinIcon />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-amber-900">
+                      No saved address found
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-amber-800">
+                      Add a service address before continuing with your booking.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          returnTo
+                            ? `/addresses?returnTo=${encodeURIComponent(returnTo)}`
+                            : "/addresses"
+                        )
+                      }
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-amber-700"
+                    >
+                      Add an address
+                      <ArrowRightIcon />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                <Field label="Service location" hint="Select one of your saved addresses.">
+                  <select
+                    value={addressId}
+                    onChange={(e) => setAddressId(e.target.value)}
+                    className={selectClass}
+                    required
+                  >
+                    <option value="">Select your service address</option>
+                    {addresses.map((address) => (
+                      <option key={address.id} value={address.id}>
+                        {address.label} — {address.addressLine}, {address.city}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
 
                 <button
                   type="button"
@@ -623,55 +513,26 @@ export default function BookingForm({
                         : "/addresses"
                     )
                   }
-                  className="mt-3 text-sm font-semibold text-amber-900 underline"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-100"
                 >
-                  Add an address
+                  <PlusIcon />
+                  Add address
                 </button>
               </div>
-            ) : (
-              <select
-                value={addressId}
-                onChange={(e) =>
-                  setAddressId(e.target.value)
-                }
-                className={selectClass}
-                required
-              >
-                <option
-                  value=""
-                  className="text-slate-500"
-                >
-                  Select your service address
-                </option>
-
-                {addresses.map((address) => (
-                  <option
-                    key={address.id}
-                    value={address.id}
-                    className="text-[#061F35]"
-                  >
-                    {address.label} —{" "}
-                    {address.addressLine},{" "}
-                    {address.city}
-                  </option>
-                ))}
-              </select>
             )}
-          </section>
+          </FormSection>
 
-          {/* Service Details */}
-          <section className="mb-8">
-            <SectionTitle
-              number="02"
-              title="Service Details"
-            />
-
+          {/* Service-specific details */}
+          <FormSection
+            number="02"
+            title="Tell us about the service"
+            description="These details help us understand the work and prepare appropriately."
+            tone="violet"
+          >
             {category === "cleaning" && (
               <CleaningFields
                 propertyType={cleaningPropertyType}
-                setPropertyType={
-                  setCleaningPropertyType
-                }
+                setPropertyType={setCleaningPropertyType}
                 bedrooms={bedrooms}
                 setBedrooms={setBedrooms}
                 bathrooms={bathrooms}
@@ -681,9 +542,7 @@ export default function BookingForm({
                 cleaningType={cleaningType}
                 setCleaningType={setCleaningType}
                 requirements={cleaningRequirements}
-                setRequirements={
-                  setCleaningRequirements
-                }
+                setRequirements={setCleaningRequirements}
               />
             )}
 
@@ -691,247 +550,234 @@ export default function BookingForm({
               <MovingFields
                 pickupAddress={pickupAddress}
                 setPickupAddress={setPickupAddress}
-                destinationAddress={
-                  destinationAddress
-                }
-                setDestinationAddress={
-                  setDestinationAddress
-                }
+                destinationAddress={destinationAddress}
+                setDestinationAddress={setDestinationAddress}
                 propertyType={movingPropertyType}
-                setPropertyType={
-                  setMovingPropertyType
-                }
+                setPropertyType={setMovingPropertyType}
                 truckSize={truckSize}
                 setTruckSize={setTruckSize}
                 numberOfMovers={numberOfMovers}
-                setNumberOfMovers={
-                  setNumberOfMovers
-                }
+                setNumberOfMovers={setNumberOfMovers}
                 packingRequired={packingRequired}
-                setPackingRequired={
-                  setPackingRequired
-                }
+                setPackingRequired={setPackingRequired}
                 specialItems={specialItems}
                 setSpecialItems={setSpecialItems}
-                estimatedDistanceKm={
-                  estimatedDistanceKm
-                }
-                setEstimatedDistanceKm={
-                  setEstimatedDistanceKm
-                }
+                estimatedDistanceKm={estimatedDistanceKm}
+                setEstimatedDistanceKm={setEstimatedDistanceKm}
               />
             )}
 
             {category === "electrical" && (
               <ElectricalFields
-                propertyType={
-                  electricalPropertyType
-                }
-                setPropertyType={
-                  setElectricalPropertyType
-                }
+                propertyType={electricalPropertyType}
+                setPropertyType={setElectricalPropertyType}
                 numberOfFloors={numberOfFloors}
-                setNumberOfFloors={
-                  setNumberOfFloors
-                }
+                setNumberOfFloors={setNumberOfFloors}
                 bedrooms={electricalBedrooms}
-                setBedrooms={
-                  setElectricalBedrooms
-                }
+                setBedrooms={setElectricalBedrooms}
                 newInstallation={newInstallation}
-                setNewInstallation={
-                  setNewInstallation
-                }
+                setNewInstallation={setNewInstallation}
                 rewiring={rewiring}
                 setRewiring={setRewiring}
                 numberOfSockets={numberOfSockets}
-                setNumberOfSockets={
-                  setNumberOfSockets
-                }
+                setNumberOfSockets={setNumberOfSockets}
                 numberOfLights={numberOfLights}
-                setNumberOfLights={
-                  setNumberOfLights
-                }
-                distributionBoard={
-                  distributionBoard
-                }
-                setDistributionBoard={
-                  setDistributionBoard
-                }
-                requirements={
-                  electricalRequirements
-                }
-                setRequirements={
-                  setElectricalRequirements
-                }
+                setNumberOfLights={setNumberOfLights}
+                distributionBoard={distributionBoard}
+                setDistributionBoard={setDistributionBoard}
+                requirements={electricalRequirements}
+                setRequirements={setElectricalRequirements}
               />
             )}
-          </section>
+          </FormSection>
 
           {/* Pricing */}
           {service.pricingType === "CALCULATED" && (
-            <section className="mb-8">
-              <SectionTitle
-                number="03"
-                title="Service Pricing"
-              />
-
-              <div className="rounded-2xl bg-white p-5 shadow-sm">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <FormSection
+              number="03"
+              title="Estimate your service cost"
+              description="Calculate an estimate using the service details you have provided."
+              tone="emerald"
+            >
+              <div className="flex flex-col gap-4 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm">
+                    <CalculatorIcon />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-[#061F35]">
+                    <p className="text-sm font-bold text-[#061F35]">
                       Calculate your estimated price
-                    </h3>
-
-                    <p className="mt-1 text-sm leading-6 text-slate-500">
-                      We'll calculate the price using
-                      the service details you provided.
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-600">
+                      You can recalculate after changing your service details.
                     </p>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleCalculatePrice}
-                    disabled={calculatingPrice}
-                    className="rounded-xl bg-[#061F35] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#082B49] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {calculatingPrice
-                      ? "Calculating..."
-                      : pricing
-                      ? "Recalculate Price"
-                      : "Calculate Price"}
-                  </button>
                 </div>
 
-                {pricingError && (
-                  <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                    <p className="text-sm font-semibold text-red-700">
-                      Unable to calculate price
-                    </p>
-
-                    <p className="mt-1 text-sm text-red-600">
-                      {pricingError}
-                    </p>
-                  </div>
-                )}
-
-                {pricing && (
-                  <PricingSummary pricing={pricing} />
-                )}
+                <button
+                  type="button"
+                  onClick={handleCalculatePrice}
+                  disabled={calculatingPrice}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {calculatingPrice ? (
+                    <>
+                      <Spinner light />
+                      Calculating...
+                    </>
+                  ) : (
+                    <>
+                      <CalculatorIcon />
+                      {pricing ? "Recalculate price" : "Calculate price"}
+                    </>
+                  )}
+                </button>
               </div>
-            </section>
+
+              {pricingError && (
+                <div
+                  role="alert"
+                  className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
+                >
+                  <p className="text-sm font-bold text-red-700">
+                    Unable to calculate price
+                  </p>
+                  <p className="mt-1 text-sm text-red-600">{pricingError}</p>
+                </div>
+              )}
+
+              {pricing && <PricingSummary pricing={pricing} />}
+            </FormSection>
           )}
 
-          {/* Quote information */}
           {service.pricingType === "QUOTE" && (
-            <section className="mb-8">
-              <SectionTitle
-                number="03"
-                title="Quote Request"
-              />
-
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <h3 className="font-bold text-amber-900">
-                  Personalized quote required
-                </h3>
-
-                <p className="mt-2 text-sm leading-6 text-amber-800">
-                  This service requires a personalized
-                  quote. Submit your request and our
-                  team will review your requirements and
-                  provide a price.
-                </p>
+            <FormSection
+              number="03"
+              title="Personalized quote"
+              description="This service requires a review before a final price can be provided."
+              tone="amber"
+            >
+              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-amber-600">
+                  <QuoteIcon />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-amber-900">
+                    A personalized quote will be prepared
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-amber-800">
+                    Submit your request and our team will review your requirements
+                    and provide a price.
+                  </p>
+                </div>
               </div>
-            </section>
+            </FormSection>
           )}
 
           {/* Schedule */}
-          <section className="mb-8">
-            <SectionTitle
-              number="04"
-              title="Preferred Schedule"
-            />
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Preferred Date">
-                <input
-                  type="date"
-                  value={scheduledDate}
-                  onChange={(e) =>
-                    setScheduledDate(
-                      e.target.value
-                    )
-                  }
-                  min={
-                    new Date()
-                      .toISOString()
-                      .split("T")[0]
-                  }
-                  className={inputClass}
-                  required
-                />
+          <FormSection
+            number="04"
+            title="Choose your preferred schedule"
+            description="Select the date and time that work best for you."
+            tone="indigo"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Preferred date" hint="Choose a date from today onwards.">
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    min={today}
+                    className={inputClass}
+                    required
+                  />
+                </div>
               </Field>
 
-              <Field label="Preferred Time">
+              <Field label="Preferred time" hint="Choose the time you would prefer.">
                 <input
                   type="time"
                   value={scheduledTime}
-                  onChange={(e) =>
-                    setScheduledTime(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => setScheduledTime(e.target.value)}
                   className={inputClass}
                   required
                 />
               </Field>
             </div>
-          </section>
+          </FormSection>
 
-          {/* Additional Notes */}
-          <section className="mb-8">
-            <SectionTitle
-              number="05"
-              title="Additional Notes"
-            />
+          {/* Notes */}
+          <FormSection
+            number="05"
+            title="Anything else we should know?"
+            description="Share additional information that may help us prepare for your service."
+            tone="slate"
+          >
+            <Field label="Additional notes" hint="Optional · Maximum 1,000 characters">
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={1000}
+                rows={4}
+                placeholder="Add access instructions, special requests or other useful information..."
+                className={textareaClass}
+              />
+              <p className="mt-1 text-right text-[11px] text-slate-400">
+                {notes.length}/1000
+              </p>
+            </Field>
+          </FormSection>
 
-            <textarea
-              value={notes}
-              onChange={(e) =>
-                setNotes(e.target.value)
-              }
-              maxLength={1000}
-              rows={4}
-              placeholder="Anything else we should know about your service?"
-              className={textareaClass}
-            />
-          </section>
+          {/* Final action */}
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <ShieldIcon />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#061F35]">
+                    Review before submitting
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    Make sure your service details, address and preferred schedule
+                    are correct before continuing.
+                  </p>
+                </div>
+              </div>
 
-          {/* Submit */}
-          <div className="border-t border-blue-200 pt-6">
-            <button
-              type="submit"
-              disabled={
-                submitting ||
-                loadingAddresses ||
-                addresses.length === 0 ||
-                (service.pricingType === "CALCULATED" &&
-                  !pricing)
-              }
-              className="w-full rounded-xl bg-[#0B72E7] px-6 py-4 text-sm font-bold text-white shadow-lg transition hover:bg-[#095FBF] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {submitting
-                ? "Creating Booking..."
-                : service.pricingType === "QUOTE"
-                ? "Request a Quote"
-                : "Confirm Booking"}
-            </button>
+              <button
+                type="submit"
+                disabled={
+                  submitting ||
+                  loadingAddresses ||
+                  addresses.length === 0 ||
+                  (service.pricingType === "CALCULATED" && !pricing)
+                }
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0B72E7] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-600/15 transition hover:bg-[#095FBF] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <Spinner light />
+                    Creating your booking...
+                  </>
+                ) : (
+                  <>
+                    {service.pricingType === "QUOTE"
+                      ? "Submit quote request"
+                      : "Confirm booking"}
+                    <ArrowRightIcon />
+                  </>
+                )}
+              </button>
 
-            <p className="mt-3 text-center text-xs text-slate-500">
-              {service.pricingType === "CALCULATED"
-                ? "Calculate your price before confirming your booking."
-                : "You can review your booking details after submission."}
-            </p>
+              <p className="mt-3 text-center text-[11px] leading-5 text-slate-400">
+                {service.pricingType === "CALCULATED"
+                  ? "You must calculate your estimated price before confirming."
+                  : "You can review your booking details after submission."}
+              </p>
+            </div>
           </div>
         </form>
       </div>
@@ -939,77 +785,146 @@ export default function BookingForm({
   );
 }
 
-/* ================================================== */
-/* Shared UI                                          */
-/* ================================================== */
+/* --------------------------------------------------
+   Shared layout components
+-------------------------------------------------- */
 
-function SectionTitle({
+function FormSection({
   number,
   title,
+  description,
+  tone,
+  children,
 }: {
   number: string;
   title: string;
+  description: string;
+  tone: "blue" | "violet" | "emerald" | "amber" | "indigo" | "slate";
+  children: ReactNode;
+}) {
+  const tones = {
+    blue: "border-t-blue-500 bg-blue-50 text-blue-600",
+    violet: "border-t-violet-500 bg-violet-50 text-violet-600",
+    emerald: "border-t-emerald-500 bg-emerald-50 text-emerald-600",
+    amber: "border-t-amber-500 bg-amber-50 text-amber-600",
+    indigo: "border-t-indigo-500 bg-indigo-50 text-indigo-600",
+    slate: "border-t-slate-400 bg-slate-100 text-slate-600",
+  };
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-slate-200 border-t-4 bg-white shadow-sm">
+      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold ${tones[tone]}`}
+        >
+          {number}
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-[#061F35] sm:text-lg">
+            {title}
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            {description}
+          </p>
+        </div>
+      </div>
+      <div className="p-5 sm:p-6">{children}</div>
+    </section>
+  );
+}
+
+function ProgressItem({
+  number,
+  label,
+  active = false,
+}: {
+  number: string;
+  label: string;
+  active?: boolean;
 }) {
   return (
-    <div className="mb-5 flex items-center gap-3">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#061F35] text-xs font-bold text-white">
+    <div
+      className={`flex items-center gap-2 rounded-xl border px-3 py-3 ${
+        active
+          ? "border-blue-200 bg-blue-50"
+          : "border-slate-200 bg-white"
+      }`}
+    >
+      <span
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-extrabold ${
+          active ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
+        }`}
+      >
         {number}
       </span>
-
-      <h2 className="text-lg font-bold text-[#061F35]">
-        {title}
-      </h2>
+      <span
+        className={`text-[10px] font-bold sm:text-xs ${
+          active ? "text-blue-800" : "text-slate-500"
+        }`}
+      >
+        {label}
+      </span>
     </div>
   );
 }
 
 function Field({
   label,
+  hint,
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  hint?: string;
+  children: ReactNode;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-[#061F35]">
+    <div className="min-w-0">
+      <label className="mb-2 block text-xs font-bold text-[#061F35] sm:text-sm">
         {label}
       </label>
-
       {children}
+      {hint && <p className="mt-1.5 text-[11px] text-slate-400">{hint}</p>}
     </div>
   );
 }
 
-/* ================================================== */
-/* Pricing Summary                                    */
-/* ================================================== */
-
-function PricingSummary({
-  pricing,
-}: {
-  pricing: PricingResult;
-}) {
+function LoadingScreen({ message }: { message: string }) {
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl border border-blue-100 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+        <Spinner />
+        <p className="text-sm font-semibold text-[#061F35]">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------
+   Pricing summary
+-------------------------------------------------- */
+
+function PricingSummary({ pricing }: { pricing: PricingResult }) {
+  return (
+    <div className="mt-5 overflow-hidden rounded-2xl border border-emerald-200">
       <div className="bg-[#061F35] px-5 py-5 text-white">
-        <p className="text-sm font-medium text-blue-200">
-          Estimated Price
-        </p>
-
-        <p className="mt-1 text-3xl font-bold">
-          KSh {pricing.totalAmount.toLocaleString()}
-        </p>
-
-        <p className="mt-1 text-sm text-blue-100">
-          {pricing.serviceName}
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-200">
+              Estimated service price
+            </p>
+            <p className="mt-2 text-3xl font-extrabold tracking-tight">
+              KSh {pricing.totalAmount.toLocaleString()}
+            </p>
+            <p className="mt-1 text-xs text-blue-100">{pricing.serviceName}</p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-emerald-200">
+            <CalculatorIcon />
+          </div>
+        </div>
       </div>
 
       <div className="bg-white p-5">
-        <h3 className="font-semibold text-[#061F35]">
-          Price breakdown
-        </h3>
+        <h3 className="text-sm font-bold text-[#061F35]">Price breakdown</h3>
 
         <div className="mt-4 space-y-3">
           {pricing.breakdown.map((item, index) => (
@@ -1017,52 +932,44 @@ function PricingSummary({
               key={`${item.item}-${index}`}
               className="flex items-center justify-between gap-4 text-sm"
             >
-              <div>
-                <p className="font-medium text-slate-700">
-                  {item.item}
-                </p>
-
+              <div className="min-w-0">
+                <p className="font-medium text-slate-700">{item.item}</p>
                 {item.quantity !== 1 && (
-                  <p className="text-xs text-slate-400">
-                    {item.quantity} × KSh{" "}
-                    {item.unitPrice.toLocaleString()}
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {item.quantity} × KSh {item.unitPrice.toLocaleString()}
                   </p>
                 )}
               </div>
-
-              <p className="font-medium text-slate-700">
+              <p className="shrink-0 font-semibold text-slate-700">
                 KSh {item.amount.toLocaleString()}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="my-5 border-t border-slate-200" />
+        <div className="my-4 border-t border-dashed border-slate-200" />
 
-        <div className="flex items-center justify-between">
-          <span className="font-semibold text-[#061F35]">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-bold text-[#061F35]">
             Estimated total
           </span>
-
-          <span className="text-xl font-bold text-blue-700">
+          <span className="text-xl font-extrabold text-emerald-700">
             KSh {pricing.totalAmount.toLocaleString()}
           </span>
         </div>
 
-        <p className="mt-4 text-xs leading-5 text-slate-500">
-          This is an estimated price based on the
-          information provided. The final price may
-          vary if additional requirements are
-          identified.
+        <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-800">
+          This is an estimated price based on the information provided. The
+          final price may vary if additional requirements are identified.
         </p>
       </div>
     </div>
   );
 }
 
-/* ================================================== */
-/* Cleaning                                           */
-/* ================================================== */
+/* --------------------------------------------------
+   Cleaning fields
+-------------------------------------------------- */
 
 function CleaningFields({
   propertyType,
@@ -1093,26 +1000,16 @@ function CleaningFields({
 }) {
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Property Type">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Property type">
           <select
             value={propertyType}
-            onChange={(e) =>
-              setPropertyType(e.target.value)
-            }
+            onChange={(e) => setPropertyType(e.target.value)}
             className={selectClass}
             required
           >
-            <option
-              value=""
-              className="text-slate-500"
-            >
-              Select property type
-            </option>
-
-            <option value="Apartment">
-              Apartment
-            </option>
+            <option value="">Select property type</option>
+            <option value="Apartment">Apartment</option>
             <option value="House">House</option>
             <option value="Villa">Villa</option>
             <option value="Office">Office</option>
@@ -1120,12 +1017,10 @@ function CleaningFields({
           </select>
         </Field>
 
-        <Field label="Cleaning Type">
+        <Field label="Cleaning type" hint="Describe the cleaning service you need.">
           <input
             value={cleaningType}
-            onChange={(e) =>
-              setCleaningType(e.target.value)
-            }
+            onChange={(e) => setCleaningType(e.target.value)}
             placeholder="e.g. General cleaning"
             className={inputClass}
             required
@@ -1133,15 +1028,13 @@ function CleaningFields({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Field label="Bedrooms">
           <input
             type="number"
             min="0"
             value={bedrooms}
-            onChange={(e) =>
-              setBedrooms(e.target.value)
-            }
+            onChange={(e) => setBedrooms(e.target.value)}
             placeholder="e.g. 3"
             className={inputClass}
           />
@@ -1152,37 +1045,33 @@ function CleaningFields({
             type="number"
             min="0"
             value={bathrooms}
-            onChange={(e) =>
-              setBathrooms(e.target.value)
-            }
+            onChange={(e) => setBathrooms(e.target.value)}
             placeholder="e.g. 2"
             className={inputClass}
           />
         </Field>
 
-        <Field label="Size (m²)">
-          <input
-            type="number"
-            min="1"
-            value={squareMeters}
-            onChange={(e) =>
-              setSquareMeters(e.target.value)
-            }
-            placeholder="e.g. 120"
-            className={inputClass}
-          />
-        </Field>
+        <div className="col-span-2 sm:col-span-1">
+          <Field label="Size (m²)">
+            <input
+              type="number"
+              min="1"
+              value={squareMeters}
+              onChange={(e) => setSquareMeters(e.target.value)}
+              placeholder="e.g. 120"
+              className={inputClass}
+            />
+          </Field>
+        </div>
       </div>
 
-      <Field label="Cleaning Requirements">
+      <Field label="Cleaning requirements" hint="Optional · Maximum 1,000 characters">
         <textarea
           value={requirements}
-          onChange={(e) =>
-            setRequirements(e.target.value)
-          }
+          onChange={(e) => setRequirements(e.target.value)}
           rows={3}
           maxLength={1000}
-          placeholder="Tell us about any areas that need special attention..."
+          placeholder="Tell us about areas that need special attention..."
           className={textareaClass}
         />
       </Field>
@@ -1190,9 +1079,9 @@ function CleaningFields({
   );
 }
 
-/* ================================================== */
-/* Moving                                             */
-/* ================================================== */
+/* --------------------------------------------------
+   Moving fields
+-------------------------------------------------- */
 
 function MovingFields({
   pickupAddress,
@@ -1231,25 +1120,21 @@ function MovingFields({
 }) {
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Pickup Address">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Pickup address">
           <input
             value={pickupAddress}
-            onChange={(e) =>
-              setPickupAddress(e.target.value)
-            }
+            onChange={(e) => setPickupAddress(e.target.value)}
             placeholder="Where should we pick up?"
             className={inputClass}
             required
           />
         </Field>
 
-        <Field label="Destination Address">
+        <Field label="Destination address">
           <input
             value={destinationAddress}
-            onChange={(e) =>
-              setDestinationAddress(e.target.value)
-            }
+            onChange={(e) => setDestinationAddress(e.target.value)}
             placeholder="Where are you moving to?"
             className={inputClass}
             required
@@ -1257,50 +1142,30 @@ function MovingFields({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Property Type">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Property type">
           <select
             value={propertyType}
-            onChange={(e) =>
-              setPropertyType(e.target.value)
-            }
+            onChange={(e) => setPropertyType(e.target.value)}
             className={selectClass}
             required
           >
-            <option
-              value=""
-              className="text-slate-500"
-            >
-              Select property type
-            </option>
-
-            <option value="Bedsitter">
-              Bedsitter
-            </option>
-            <option value="Apartment">
-              Apartment
-            </option>
+            <option value="">Select property type</option>
+            <option value="Bedsitter">Bedsitter</option>
+            <option value="Apartment">Apartment</option>
             <option value="House">House</option>
             <option value="Office">Office</option>
             <option value="Other">Other</option>
           </select>
         </Field>
 
-        <Field label="Truck Size">
+        <Field label="Truck size">
           <select
             value={truckSize}
-            onChange={(e) =>
-              setTruckSize(e.target.value)
-            }
+            onChange={(e) => setTruckSize(e.target.value)}
             className={selectClass}
           >
-            <option
-              value=""
-              className="text-slate-500"
-            >
-              Select truck size
-            </option>
-
+            <option value="">Select truck size</option>
             <option value="Small">Small</option>
             <option value="Medium">Medium</option>
             <option value="Large">Large</option>
@@ -1308,55 +1173,42 @@ function MovingFields({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Number of Movers">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Number of movers">
           <input
             type="number"
             min="1"
             value={numberOfMovers}
-            onChange={(e) =>
-              setNumberOfMovers(e.target.value)
-            }
+            onChange={(e) => setNumberOfMovers(e.target.value)}
             placeholder="e.g. 2"
             className={inputClass}
           />
         </Field>
 
-        <Field label="Estimated Distance (km)">
+        <Field label="Estimated distance (km)">
           <input
             type="number"
             min="1"
             value={estimatedDistanceKm}
-            onChange={(e) =>
-              setEstimatedDistanceKm(e.target.value)
-            }
+            onChange={(e) => setEstimatedDistanceKm(e.target.value)}
             placeholder="e.g. 15"
             className={inputClass}
           />
         </Field>
       </div>
 
-      <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-white p-4">
-        <input
-          type="checkbox"
-          checked={packingRequired}
-          onChange={(e) =>
-            setPackingRequired(e.target.checked)
-          }
-          className="h-4 w-4 accent-[#0B72E7]"
-        />
+      <CheckboxField
+        checked={packingRequired}
+        onChange={setPackingRequired}
+        label="I need packing assistance"
+        description="Include help with packing items before transportation."
+        tone="blue"
+      />
 
-        <span className="text-sm font-semibold text-[#061F35]">
-          I need packing assistance
-        </span>
-      </label>
-
-      <Field label="Special Items">
+      <Field label="Special items" hint="Optional">
         <textarea
           value={specialItems}
-          onChange={(e) =>
-            setSpecialItems(e.target.value)
-          }
+          onChange={(e) => setSpecialItems(e.target.value)}
           rows={3}
           maxLength={1000}
           placeholder="Pianos, fragile items, large furniture, etc."
@@ -1367,9 +1219,9 @@ function MovingFields({
   );
 }
 
-/* ================================================== */
-/* Electrical                                         */
-/* ================================================== */
+/* --------------------------------------------------
+   Electrical fields
+-------------------------------------------------- */
 
 function ElectricalFields({
   propertyType,
@@ -1412,26 +1264,16 @@ function ElectricalFields({
 }) {
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Property Type">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Property type">
           <select
             value={propertyType}
-            onChange={(e) =>
-              setPropertyType(e.target.value)
-            }
+            onChange={(e) => setPropertyType(e.target.value)}
             className={selectClass}
             required
           >
-            <option
-              value=""
-              className="text-slate-500"
-            >
-              Select property type
-            </option>
-
-            <option value="Apartment">
-              Apartment
-            </option>
+            <option value="">Select property type</option>
+            <option value="Apartment">Apartment</option>
             <option value="House">House</option>
             <option value="Villa">Villa</option>
             <option value="Office">Office</option>
@@ -1439,87 +1281,85 @@ function ElectricalFields({
           </select>
         </Field>
 
-        <Field label="Number of Floors">
+        <Field label="Number of floors">
           <input
             type="number"
             min="1"
             value={numberOfFloors}
-            onChange={(e) =>
-              setNumberOfFloors(e.target.value)
-            }
+            onChange={(e) => setNumberOfFloors(e.target.value)}
             placeholder="e.g. 2"
             className={inputClass}
           />
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Field label="Bedrooms">
           <input
             type="number"
             min="0"
             value={bedrooms}
-            onChange={(e) =>
-              setBedrooms(e.target.value)
-            }
+            onChange={(e) => setBedrooms(e.target.value)}
             placeholder="e.g. 3"
             className={inputClass}
           />
         </Field>
 
-        <Field label="Number of Sockets">
+        <Field label="Sockets">
           <input
             type="number"
             min="0"
             value={numberOfSockets}
-            onChange={(e) =>
-              setNumberOfSockets(e.target.value)
-            }
+            onChange={(e) => setNumberOfSockets(e.target.value)}
             placeholder="e.g. 12"
             className={inputClass}
           />
         </Field>
 
-        <Field label="Number of Lights">
-          <input
-            type="number"
-            min="0"
-            value={numberOfLights}
-            onChange={(e) =>
-              setNumberOfLights(e.target.value)
-            }
-            placeholder="e.g. 10"
-            className={inputClass}
+        <div className="col-span-2 sm:col-span-1">
+          <Field label="Lights">
+            <input
+              type="number"
+              min="0"
+              value={numberOfLights}
+              onChange={(e) => setNumberOfLights(e.target.value)}
+              placeholder="e.g. 10"
+              className={inputClass}
+            />
+          </Field>
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-3 text-xs font-bold text-[#061F35]">
+          Type of electrical work
+        </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <CheckboxField
+            checked={newInstallation}
+            onChange={setNewInstallation}
+            label="New installation"
+            tone="violet"
           />
-        </Field>
+          <CheckboxField
+            checked={rewiring}
+            onChange={setRewiring}
+            label="Rewiring"
+            tone="blue"
+          />
+          <CheckboxField
+            checked={distributionBoard}
+            onChange={setDistributionBoard}
+            label="Distribution board"
+            tone="amber"
+          />
+        </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <CheckboxField
-          checked={newInstallation}
-          onChange={setNewInstallation}
-          label="New installation"
-        />
-
-        <CheckboxField
-          checked={rewiring}
-          onChange={setRewiring}
-          label="Rewiring"
-        />
-
-        <CheckboxField
-          checked={distributionBoard}
-          onChange={setDistributionBoard}
-          label="Distribution board"
-        />
-      </div>
-
-      <Field label="Electrical Requirements">
+      <Field label="Electrical requirements" hint="Optional · Maximum 1,000 characters">
         <textarea
           value={requirements}
-          onChange={(e) =>
-            setRequirements(e.target.value)
-          }
+          onChange={(e) => setRequirements(e.target.value)}
           rows={4}
           maxLength={1000}
           placeholder="Describe the electrical work you need..."
@@ -1530,33 +1370,168 @@ function ElectricalFields({
   );
 }
 
-/* ================================================== */
-/* Checkbox                                           */
-/* ================================================== */
+/* --------------------------------------------------
+   Reusable checkbox
+-------------------------------------------------- */
 
 function CheckboxField({
   checked,
   onChange,
   label,
+  description,
+  tone = "blue",
 }: {
   checked: boolean;
   onChange: (value: boolean) => void;
   label: string;
+  description?: string;
+  tone?: "blue" | "violet" | "amber";
 }) {
+  const tones = {
+    blue: "border-blue-100 bg-blue-50/60",
+    violet: "border-violet-100 bg-violet-50/60",
+    amber: "border-amber-100 bg-amber-50/60",
+  };
+
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-white p-4">
+    <label
+      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition hover:shadow-sm ${tones[tone]}`}
+    >
       <input
         type="checkbox"
         checked={checked}
-        onChange={(e) =>
-          onChange(e.target.checked)
-        }
-        className="h-4 w-4 accent-[#0B72E7]"
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-4 w-4 shrink-0 accent-blue-600"
       />
-
-      <span className="text-sm font-semibold text-[#061F35]">
-        {label}
+      <span className="min-w-0">
+        <span className="block text-xs font-bold text-[#061F35]">{label}</span>
+        {description && (
+          <span className="mt-1 block text-[11px] leading-5 text-slate-500">
+            {description}
+          </span>
+        )}
       </span>
     </label>
+  );
+}
+
+/* --------------------------------------------------
+   Icons and small UI elements
+-------------------------------------------------- */
+
+function Spinner({ light = false }: { light?: boolean }) {
+  return (
+    <span
+      className={`inline-block h-4 w-4 animate-spin rounded-full border-2 ${
+        light
+          ? "border-white/40 border-t-white"
+          : "border-blue-200 border-t-blue-600"
+      }`}
+      aria-hidden="true"
+    />
+  );
+}
+
+function ServiceIcon({ category }: { category: BookingCategory }) {
+  if (category === "cleaning") return <CleaningIcon />;
+  if (category === "moving") return <MovingIcon />;
+  return <ElectricalIcon />;
+}
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-6 w-6">
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+      <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function MapPinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+      <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+      <path d="M5 12h14m-6-6 6 6-6 6" />
+    </svg>
+  );
+}
+
+function AlertIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5 shrink-0">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v5m0 3h.01" />
+    </svg>
+  );
+}
+
+function CalculatorIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+      <rect x="5" y="2.5" width="14" height="19" rx="2" />
+      <path d="M8 6h8v4H8zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+    </svg>
+  );
+}
+
+function QuoteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+      <path d="M4 5h16v14H4z" />
+      <path d="M8 9h8M8 13h5" />
+    </svg>
+  );
+}
+
+function CleaningIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-6 w-6">
+      <path d="m5 20 4-4m-1-5 5-5 6 6-5 5-6-6Z" />
+      <path d="m14 3 .5 2.5L17 6l-2.5.5L14 9l-.5-2.5L11 6l2.5-.5L14 3Z" />
+      <path d="m19 13 .4 1.6L21 15l-1.6.4L19 17l-.4-1.6L17 15l1.6-.4L19 13Z" />
+    </svg>
+  );
+}
+
+function MovingIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-6 w-6">
+      <path d="M3 7h11v11H3zM14 11h4l3 3v4h-7z" />
+      <circle cx="7.5" cy="19" r="1.5" />
+      <circle cx="17.5" cy="19" r="1.5" />
+    </svg>
+  );
+}
+
+function ElectricalIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-6 w-6">
+      <path d="m13 2-9 12h7l-1 8 10-13h-7l0-7Z" />
+    </svg>
   );
 }

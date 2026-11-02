@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -35,56 +36,42 @@ function staffTypeLabel(type: StaffType) {
   switch (type) {
     case "CLEANER":
       return "Cleaner";
-
     case "MOVER":
       return "Mover";
-
     case "ELECTRICIAN":
       return "Electrician";
-
     case "SUPERVISOR":
       return "Supervisor";
-
     default:
       return type;
   }
 }
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString(
-    "en-KE",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }
-  );
+  return new Date(date).toLocaleDateString("en-KE", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function formatDateTime(date: string) {
-  return new Date(date).toLocaleString(
-    "en-KE",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }
-  );
+  return new Date(date).toLocaleString("en-KE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 function statusClass(status: string) {
   switch (status) {
     case "ASSIGNED":
       return "bg-blue-50 text-blue-700";
-
     case "IN_PROGRESS":
       return "bg-amber-50 text-amber-700";
-
     case "COMPLETED":
       return "bg-green-50 text-green-700";
-
     case "CANCELLED":
       return "bg-red-50 text-red-700";
-
     default:
       return "bg-slate-100 text-slate-600";
   }
@@ -97,70 +84,40 @@ export default function AdminStaffDetailPage({
 }) {
   const { id } = use(params);
 
-  const [staff, setStaff] =
-    useState<Staff | null>(null);
+  const [staff, setStaff] = useState<Staff | null>(null);
+  const [assignments, setAssignments] = useState<StaffAssignment[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
 
-  const [assignments, setAssignments] =
-    useState<StaffAssignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingBookings, setLoadingBookings] = useState(true);
 
-  const [bookings, setBookings] =
-    useState<Booking[]>([]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [loading, setLoading] =
-    useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [loadingBookings, setLoadingBookings] =
-    useState(true);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [staffType, setStaffType] = useState<StaffType>("CLEANER");
 
-  const [error, setError] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState("");
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [name, setName] =
-    useState("");
-
-  const [phone, setPhone] =
-    useState("");
-
-  const [staffType, setStaffType] =
-    useState<StaffType>("CLEANER");
-
-  const [selectedBookingId, setSelectedBookingId] =
-    useState("");
-
-  const [assigning, setAssigning] =
-    useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState("");
+  const [assigning, setAssigning] = useState(false);
 
   async function loadStaff() {
     try {
       setLoading(true);
       setError("");
 
-      const [
-        staffResult,
-        assignmentResult,
-      ] = await Promise.all([
+      const [staffResult, assignmentResult] = await Promise.all([
         getStaffMember(id),
         getStaffAssignments(id),
       ]);
 
       setStaff(staffResult);
       setAssignments(assignmentResult);
-
       setName(staffResult.user.name);
-
-      setPhone(
-        staffResult.user.phone || ""
-      );
-
-      setStaffType(
-        staffResult.staffType
-      );
+      setPhone(staffResult.user.phone || "");
+      setStaffType(staffResult.staffType);
     } catch (err) {
       setError(
         err instanceof Error
@@ -176,9 +133,7 @@ export default function AdminStaffDetailPage({
     try {
       setLoadingBookings(true);
 
-      const result =
-        await getAdminBookings();
-
+      const result = await getAdminBookings();
       setBookings(result);
     } catch (err) {
       setError(
@@ -196,89 +151,46 @@ export default function AdminStaffDetailPage({
     loadBookings();
   }, [id]);
 
-  const assignedBookingIds =
-    useMemo(() => {
-      return new Set(
-        assignments.map(
-          (assignment) =>
-            assignment.bookingId
-        )
-      );
-    }, [assignments]);
+  const assignedBookingIds = useMemo(() => {
+    return new Set(
+      assignments.map((assignment) => assignment.bookingId)
+    );
+  }, [assignments]);
 
-  const eligibleBookings =
-    useMemo(() => {
-      return bookings.filter(
-        (booking) => {
-          if (
-            booking.status ===
-              "CANCELLED" ||
-            booking.status ===
-              "COMPLETED"
-          ) {
-            return false;
-          }
+  const eligibleBookings = useMemo(() => {
+    return bookings.filter((booking) => {
+      if (
+        booking.status === "CANCELLED" ||
+        booking.status === "COMPLETED"
+      ) {
+        return false;
+      }
 
-          if (
-            assignedBookingIds.has(
-              booking.id
-            )
-          ) {
-            return false;
-          }
+      if (assignedBookingIds.has(booking.id)) {
+        return false;
+      }
 
-          if (
-            staffType ===
-            "CLEANER"
-          ) {
-            return (
-              booking.service
-                .category ===
-              "CLEANING"
-            );
-          }
+      if (staffType === "CLEANER") {
+        return booking.service.category === "CLEANING";
+      }
 
-          if (
-            staffType === "MOVER"
-          ) {
-            return (
-              booking.service
-                .category ===
-              "MOVING"
-            );
-          }
+      if (staffType === "MOVER") {
+        return booking.service.category === "MOVING";
+      }
 
-          if (
-            staffType ===
-            "ELECTRICIAN"
-          ) {
-            return (
-              booking.service
-                .category ===
-              "ELECTRICAL"
-            );
-          }
+      if (staffType === "ELECTRICIAN") {
+        return booking.service.category === "ELECTRICAL";
+      }
 
-          return true;
-        }
-      );
-    }, [
-      bookings,
-      assignedBookingIds,
-      staffType,
-    ]);
+      return true;
+    });
+  }, [bookings, assignedBookingIds, staffType]);
 
-  const selectedBooking =
-    useMemo(() => {
-      return eligibleBookings.find(
-        (booking) =>
-          booking.id ===
-          selectedBookingId
-      );
-    }, [
-      eligibleBookings,
-      selectedBookingId,
-    ]);
+  const selectedBooking = useMemo(() => {
+    return eligibleBookings.find(
+      (booking) => booking.id === selectedBookingId
+    );
+  }, [eligibleBookings, selectedBookingId]);
 
   async function handleUpdate(
     event: React.FormEvent<HTMLFormElement>
@@ -290,18 +202,14 @@ export default function AdminStaffDetailPage({
       setError("");
       setSuccess("");
 
-      const updated =
-        await updateStaffMember(id, {
-          name,
-          phone,
-          staffType,
-        });
+      const updated = await updateStaffMember(id, {
+        name,
+        phone,
+        staffType,
+      });
 
       setStaff(updated);
-
-      setSuccess(
-        "Staff member updated successfully."
-      );
+      setSuccess("Staff member updated successfully.");
     } catch (err) {
       setError(
         err instanceof Error
@@ -321,11 +229,10 @@ export default function AdminStaffDetailPage({
       setError("");
       setSuccess("");
 
-      const updated =
-        await updateStaffAvailability(
-          id,
-          !staff.isAvailable
-        );
+      const updated = await updateStaffAvailability(
+        id,
+        !staff.isAvailable
+      );
 
       setStaff(updated);
 
@@ -347,9 +254,7 @@ export default function AdminStaffDetailPage({
 
   async function handleAssign() {
     if (!selectedBookingId) {
-      setError(
-        "Please select a booking."
-      );
+      setError("Please select a booking.");
       return;
     }
 
@@ -358,19 +263,14 @@ export default function AdminStaffDetailPage({
       setError("");
       setSuccess("");
 
-      await assignStaff(
-        id,
-        selectedBookingId
-      );
+      await assignStaff(id, selectedBookingId);
 
       setSelectedBookingId("");
 
       await loadStaff();
       await loadBookings();
 
-      setSuccess(
-        "Staff member assigned successfully."
-      );
+      setSuccess("Staff member assigned successfully.");
     } catch (err) {
       setError(
         err instanceof Error
@@ -382,32 +282,23 @@ export default function AdminStaffDetailPage({
     }
   }
 
-  async function handleUnassign(
-    assignmentId: string
-  ) {
-    const confirmed =
-      window.confirm(
-        "Are you sure you want to remove this staff assignment?"
-      );
+  async function handleUnassign(assignmentId: string) {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this staff assignment?"
+    );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       setError("");
       setSuccess("");
 
-      await unassignStaff(
-        assignmentId
-      );
+      await unassignStaff(assignmentId);
 
       await loadStaff();
       await loadBookings();
 
-      setSuccess(
-        "Staff assignment removed successfully."
-      );
+      setSuccess("Staff assignment removed successfully.");
     } catch (err) {
       setError(
         err instanceof Error
@@ -462,7 +353,7 @@ export default function AdminStaffDetailPage({
       <main className="min-h-full bg-slate-50">
         {/* Header */}
         <section className="bg-[#061F35]">
-          <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
             <Link
               href="/admin/staff"
               className="text-sm font-medium text-blue-300 hover:text-white"
@@ -470,62 +361,57 @@ export default function AdminStaffDetailPage({
               ← Back to Staff
             </Link>
 
-            <div className="mt-6 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-blue-300">
+            <div className="mt-5 flex flex-col gap-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-300 sm:text-sm">
                   Staff Management
                 </p>
 
-                <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+                <h1 className="mt-2 break-words text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
                   {staff.user.name}
                 </h1>
 
-                <p className="mt-2 text-slate-300">
-                  {staffTypeLabel(
-                    staff.staffType
-                  )}{" "}
-                  · {staff.user.email}
+                <p className="mt-2 break-all text-sm text-slate-300 sm:text-base">
+                  {staffTypeLabel(staff.staffType)} · {staff.user.email}
                 </p>
               </div>
 
               <span
-                className={`inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold ${
+                className={`inline-flex w-fit shrink-0 rounded-full px-4 py-2 text-xs font-semibold sm:text-sm ${
                   staff.isAvailable
                     ? "bg-green-100 text-green-800"
                     : "bg-slate-200 text-slate-700"
                 }`}
               >
-                {staff.isAvailable
-                  ? "Available"
-                  : "Unavailable"}
+                {staff.isAvailable ? "Available" : "Unavailable"}
               </span>
             </div>
           </div>
         </section>
 
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
           {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:mb-6">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 sm:mb-6">
               {success}
             </div>
           )}
 
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-8">
             {/* Profile */}
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-1">
+            <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-1">
               <h2 className="text-lg font-bold text-slate-900">
                 Staff Profile
               </h2>
 
               <form
                 onSubmit={handleUpdate}
-                className="mt-6 space-y-5"
+                className="mt-5 space-y-4 sm:mt-6 sm:space-y-5"
               >
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -535,13 +421,9 @@ export default function AdminStaffDetailPage({
                   <input
                     type="text"
                     value={name}
-                    onChange={(event) =>
-                      setName(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setName(event.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
@@ -554,7 +436,7 @@ export default function AdminStaffDetailPage({
                     type="email"
                     value={staff.user.email}
                     disabled
-                    className="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-4 py-3 text-slate-500"
+                    className="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500"
                   />
                 </div>
 
@@ -566,13 +448,9 @@ export default function AdminStaffDetailPage({
                   <input
                     type="tel"
                     value={phone}
-                    onChange={(event) =>
-                      setPhone(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setPhone(event.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
 
@@ -584,25 +462,15 @@ export default function AdminStaffDetailPage({
                   <select
                     value={staffType}
                     onChange={(event) =>
-                      setStaffType(
-                        event.target
-                          .value as StaffType
-                      )
+                      setStaffType(event.target.value as StaffType)
                     }
-                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   >
-                    {staffTypes.map(
-                      (type) => (
-                        <option
-                          key={type}
-                          value={type}
-                        >
-                          {staffTypeLabel(
-                            type
-                          )}
-                        </option>
-                      )
-                    )}
+                    {staffTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {staffTypeLabel(type)}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -611,18 +479,14 @@ export default function AdminStaffDetailPage({
                   disabled={saving}
                   className="w-full rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {saving
-                    ? "Saving..."
-                    : "Save Changes"}
+                  {saving ? "Saving..." : "Save Changes"}
                 </button>
               </form>
 
-              <div className="mt-6 border-t border-slate-200 pt-6">
+              <div className="mt-5 border-t border-slate-200 pt-5 sm:mt-6 sm:pt-6">
                 <button
                   type="button"
-                  onClick={
-                    handleAvailability
-                  }
+                  onClick={handleAvailability}
                   disabled={saving}
                   className={`w-full rounded-lg px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                     staff.isAvailable
@@ -638,17 +502,16 @@ export default function AdminStaffDetailPage({
             </section>
 
             {/* Assignments */}
-            <section className="lg:col-span-2">
+            <section className="min-w-0 lg:col-span-2">
               {/* Assign booking */}
-              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">
                     Assign Booking
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    Select an eligible booking to
-                    assign to this staff member.
+                    Select an eligible booking to assign to this staff member.
                   </p>
                 </div>
 
@@ -661,86 +524,47 @@ export default function AdminStaffDetailPage({
                     <div className="rounded-lg bg-slate-50 px-4 py-4 text-sm text-slate-500">
                       Loading available bookings...
                     </div>
-                  ) : eligibleBookings.length ===
-                    0 ? (
+                  ) : eligibleBookings.length === 0 ? (
                     <div className="rounded-lg bg-slate-50 px-4 py-4">
                       <p className="text-sm font-medium text-slate-700">
                         No eligible bookings available.
                       </p>
 
                       <p className="mt-1 text-xs leading-5 text-slate-500">
-                        There are currently no
-                        unassigned active{" "}
-                        {staffTypeLabel(
-                          staff.staffType
-                        ).toLowerCase()}{" "}
-                        bookings available for this
-                        staff member.
+                        There are currently no unassigned active{" "}
+                        {staffTypeLabel(staff.staffType).toLowerCase()}{" "}
+                        bookings available for this staff member.
                       </p>
                     </div>
                   ) : (
                     <>
                       <select
-                        value={
-                          selectedBookingId
-                        }
+                        value={selectedBookingId}
                         onChange={(event) =>
-                          setSelectedBookingId(
-                            event.target.value
-                          )
+                          setSelectedBookingId(event.target.value)
                         }
                         className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                       >
-                        <option value="">
-                          Select a booking
-                        </option>
+                        <option value="">Select a booking</option>
 
-                        {eligibleBookings.map(
-                          (booking) => (
-                            <option
-                              key={
-                                booking.id
-                              }
-                              value={
-                                booking.id
-                              }
-                            >
-                              {
-                                booking.bookingNumber
-                              }{" "}
-                              —{" "}
-                              {
-                                booking
-                                  .service
-                                  .name
-                              }{" "}
-                              —{" "}
-                              {
-                                booking
-                                  .user
-                                  .name
-                              }
-                            </option>
-                          )
-                        )}
+                        {eligibleBookings.map((booking) => (
+                          <option key={booking.id} value={booking.id}>
+                            {booking.bookingNumber} — {booking.service.name} —{" "}
+                            {booking.user.name}
+                          </option>
+                        ))}
                       </select>
 
                       {selectedBooking && (
-                        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                              <p className="font-semibold text-slate-900">
-                                {
-                                  selectedBooking.bookingNumber
-                                }
+                        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:p-4">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <p className="break-words font-semibold text-slate-900">
+                                {selectedBooking.bookingNumber}
                               </p>
 
                               <p className="mt-1 text-sm text-slate-600">
-                                {
-                                  selectedBooking
-                                    .service
-                                    .name
-                                }
+                                {selectedBooking.service.name}
                               </p>
                             </div>
 
@@ -749,82 +573,59 @@ export default function AdminStaffDetailPage({
                                 selectedBooking.status
                               )}`}
                             >
-                              {
-                                selectedBooking.status
-                              }
+                              {selectedBooking.status}
                             </span>
                           </div>
 
-                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                          <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 sm:text-xs">
                                 Customer
                               </p>
 
-                              <p className="mt-1 text-sm text-slate-700">
-                                {
-                                  selectedBooking
-                                    .user
-                                    .name
-                                }
+                              <p className="mt-1 break-words text-sm text-slate-700">
+                                {selectedBooking.user.name}
                               </p>
                             </div>
 
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 sm:text-xs">
                                 Category
                               </p>
 
-                              <p className="mt-1 text-sm text-slate-700">
-                                {
-                                  selectedBooking
-                                    .service
-                                    .category
-                                }
+                              <p className="mt-1 break-words text-sm text-slate-700">
+                                {selectedBooking.service.category}
                               </p>
                             </div>
 
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 sm:text-xs">
                                 Date
                               </p>
 
-                              <p className="mt-1 text-sm text-slate-700">
-                                {formatDate(
-                                  selectedBooking.scheduledDate
-                                )}
+                              <p className="mt-1 break-words text-sm text-slate-700">
+                                {formatDate(selectedBooking.scheduledDate)}
                               </p>
                             </div>
 
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 sm:text-xs">
                                 Time
                               </p>
 
-                              <p className="mt-1 text-sm text-slate-700">
-                                {
-                                  selectedBooking.scheduledTime
-                                }
+                              <p className="mt-1 break-words text-sm text-slate-700">
+                                {selectedBooking.scheduledTime}
                               </p>
                             </div>
 
-                            <div className="sm:col-span-2">
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            <div className="col-span-2 min-w-0">
+                              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 sm:text-xs">
                                 Location
                               </p>
 
-                              <p className="mt-1 text-sm text-slate-700">
-                                {
-                                  selectedBooking
-                                    .address
-                                    .addressLine
-                                }
-                                ,{" "}
-                                {
-                                  selectedBooking
-                                    .address
-                                    .city
-                                }
+                              <p className="mt-1 break-words text-sm text-slate-700">
+                                {selectedBooking.address.addressLine},{" "}
+                                {selectedBooking.address.city}
                               </p>
                             </div>
                           </div>
@@ -833,18 +634,11 @@ export default function AdminStaffDetailPage({
 
                       <button
                         type="button"
-                        onClick={
-                          handleAssign
-                        }
-                        disabled={
-                          assigning ||
-                          !selectedBookingId
-                        }
+                        onClick={handleAssign}
+                        disabled={assigning || !selectedBookingId}
                         className="mt-4 w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {assigning
-                          ? "Assigning..."
-                          : "Assign Booking"}
+                        {assigning ? "Assigning..." : "Assign Booking"}
                       </button>
                     </>
                   )}
@@ -852,165 +646,101 @@ export default function AdminStaffDetailPage({
               </div>
 
               {/* Assigned bookings */}
-              <div className="mt-8 rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
+              <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:mt-8">
+                <div className="border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
                   <h2 className="text-lg font-bold text-slate-900">
                     Assigned Bookings
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    {assignments.length}{" "}
-                    assignment
-                    {assignments.length ===
-                    1
-                      ? ""
-                      : "s"}
+                    {assignments.length} assignment
+                    {assignments.length === 1 ? "" : "s"}
                   </p>
                 </div>
 
-                {assignments.length ===
-                0 ? (
-                  <div className="px-6 py-12 text-center">
+                {assignments.length === 0 ? (
+                  <div className="px-4 py-10 text-center sm:px-6 sm:py-12">
                     <p className="font-medium text-slate-900">
                       No assignments yet
                     </p>
 
                     <p className="mt-2 text-sm text-slate-500">
-                      Select an available booking above
-                      to assign the first job.
+                      Select an available booking above to assign the first job.
                     </p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100">
-                    {assignments.map(
-                      (assignment) => (
-                        <div
-                          key={
-                            assignment.id
-                          }
-                          className="p-6"
-                        >
-                          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                              <p className="font-semibold text-slate-900">
-                                {
-                                  assignment
-                                    .booking
-                                    .bookingNumber
-                                }
-                              </p>
+                  <div className="grid grid-cols-2 gap-3 p-3 sm:gap-4 sm:p-4">
+                    {assignments.map((assignment) => (
+                      <article
+                        key={assignment.id}
+                        className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-200 bg-white p-3 sm:p-4"
+                      >
+                        <div className="min-w-0">
+                          <p className="break-words text-sm font-semibold text-slate-900 sm:text-base">
+                            {assignment.booking.bookingNumber}
+                          </p>
 
-                              <p className="mt-1 text-sm text-slate-500">
-                                {
-                                  assignment
-                                    .booking
-                                    .service
-                                    .name
-                                }
-                              </p>
+                          <p className="mt-1 break-words text-xs text-slate-500 sm:text-sm">
+                            {assignment.booking.service.name}
+                          </p>
 
-                              <div className="mt-3 space-y-1 text-sm text-slate-600">
-                                <p>
-                                  <span className="font-medium">
-                                    Customer:
-                                  </span>{" "}
-                                  {
-                                    assignment
-                                      .booking
-                                      .user
-                                      .name
-                                  }
-                                </p>
+                          <div className="mt-3 space-y-2 text-xs text-slate-600 sm:text-sm">
+                            <p className="break-words">
+                              <span className="font-medium">Customer:</span>{" "}
+                              {assignment.booking.user.name}
+                            </p>
 
-                                <p>
-                                  <span className="font-medium">
-                                    Date:
-                                  </span>{" "}
-                                  {formatDate(
-                                    assignment
-                                      .booking
-                                      .scheduledDate
-                                  )}
-                                </p>
-
-                                <p>
-                                  <span className="font-medium">
-                                    Time:
-                                  </span>{" "}
-                                  {
-                                    assignment
-                                      .booking
-                                      .scheduledTime
-                                  }
-                                </p>
-
-                                <p>
-                                  <span className="font-medium">
-                                    Location:
-                                  </span>{" "}
-                                  {
-                                    assignment
-                                      .booking
-                                      .address
-                                      ?.addressLine
-                                  }
-                                  ,{" "}
-                                  {
-                                    assignment
-                                      .booking
-                                      .address
-                                      ?.city
-                                  }
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col items-start gap-3 sm:items-end">
-                              <span
-                                className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                                  assignment
-                                    .booking
-                                    .status
-                                )}`}
-                              >
-                                {
-                                  assignment
-                                    .booking
-                                    .status
-                                }
-                              </span>
-
-                              {assignment.completedAt ? (
-                                <span className="text-xs text-slate-500">
-                                  Completed{" "}
-                                  {formatDate(
-                                    assignment.completedAt
-                                  )}
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleUnassign(
-                                      assignment.id
-                                    )
-                                  }
-                                  disabled={
-                                    assignment
-                                      .booking
-                                      .status ===
-                                    "COMPLETED"
-                                  }
-                                  className="text-sm font-semibold text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                  Unassign
-                                </button>
+                            <p>
+                              <span className="font-medium">Date:</span>{" "}
+                              {formatDate(
+                                assignment.booking.scheduledDate
                               )}
-                            </div>
+                            </p>
+
+                            <p>
+                              <span className="font-medium">Time:</span>{" "}
+                              {assignment.booking.scheduledTime}
+                            </p>
+
+                            <p className="break-words">
+                              <span className="font-medium">Location:</span>{" "}
+                              {assignment.booking.address?.addressLine},{" "}
+                              {assignment.booking.address?.city}
+                            </p>
                           </div>
                         </div>
-                      )
-                    )}
+
+                        <div className="mt-4 border-t border-slate-100 pt-3">
+                          <span
+                            className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[10px] font-semibold sm:text-xs ${statusClass(
+                              assignment.booking.status
+                            )}`}
+                          >
+                            {assignment.booking.status}
+                          </span>
+
+                          {assignment.completedAt ? (
+                            <p className="mt-2 text-[10px] text-slate-500 sm:text-xs">
+                              Completed{" "}
+                              {formatDate(assignment.completedAt)}
+                            </p>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleUnassign(assignment.id)
+                              }
+                              disabled={
+                                assignment.booking.status === "COMPLETED"
+                              }
+                              className="mt-3 text-xs font-semibold text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm"
+                            >
+                              Unassign
+                            </button>
+                          )}
+                        </div>
+                      </article>
+                    ))}
                   </div>
                 )}
               </div>

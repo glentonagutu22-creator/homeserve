@@ -1,53 +1,65 @@
+
 "use client";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock3,
+  MapPin,
+  Wallet,
+  ClipboardList,
+  Sparkles,
+  Truck,
+  Zap,
+  CreditCard,
+  Users,
+  Star,
+  Ban,
+  Loader2,
+  CheckCircle2,
+  FileText,
+  Home,
+  ShieldCheck,
+  Receipt,
+} from "lucide-react";
 
 import DashboardShell from "@/components/dashboard/DashboardShell";
 
-import {
-  cancelBooking,
-  getBooking,
-} from "@/lib/bookings";
+import { cancelBooking, getBooking } from "@/lib/bookings";
 
-import type {
-  Booking,
-  BookingStatus,
-} from "@/types/booking";
+import type { Booking, BookingStatus } from "@/types/booking";
 
-const statusStyles: Record<
-  BookingStatus,
-  string
-> = {
-  PENDING:
-    "bg-amber-50 text-amber-700 border-amber-100",
-
-  CONFIRMED:
-    "bg-blue-50 text-blue-700 border-blue-100",
-
-  ASSIGNED:
-    "bg-purple-50 text-purple-700 border-purple-100",
-
-  IN_PROGRESS:
-    "bg-cyan-50 text-cyan-700 border-cyan-100",
-
-  COMPLETED:
-    "bg-green-50 text-green-700 border-green-100",
-
-  CANCELLED:
-    "bg-red-50 text-red-700 border-red-100",
+const statusStyles: Record<BookingStatus, string> = {
+  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
+  CONFIRMED: "bg-blue-50 text-blue-700 border-blue-200",
+  ASSIGNED: "bg-purple-50 text-purple-700 border-purple-200",
+  IN_PROGRESS: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  COMPLETED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
 };
 
 const categoryStyles = {
-  CLEANING:
-    "bg-blue-50 text-blue-700 border-blue-100",
-
-  MOVING:
-    "bg-green-50 text-green-700 border-green-100",
-
-  ELECTRICAL:
-    "bg-amber-50 text-amber-700 border-amber-100",
+  CLEANING: {
+    badge: "bg-sky-50 text-sky-700 border-sky-200",
+    icon: "bg-sky-100 text-sky-700",
+    border: "border-sky-200",
+    heading: "text-sky-700",
+  },
+  MOVING: {
+    badge: "bg-orange-50 text-orange-700 border-orange-200",
+    icon: "bg-orange-100 text-orange-700",
+    border: "border-orange-200",
+    heading: "text-orange-700",
+  },
+  ELECTRICAL: {
+    badge: "bg-amber-50 text-amber-700 border-amber-200",
+    icon: "bg-amber-100 text-amber-700",
+    border: "border-amber-200",
+    heading: "text-amber-700",
+  },
 };
 
 function formatDate(date: string) {
@@ -59,30 +71,20 @@ function formatDate(date: string) {
 }
 
 function formatCategory(category: string) {
-  return (
-    category.charAt(0) +
-    category.slice(1).toLowerCase()
-  );
+  return category.charAt(0) + category.slice(1).toLowerCase();
 }
 
 function formatStatus(status: BookingStatus) {
   return status.replace("_", " ");
 }
 
-function formatAmount(
-  amount: string | null
-) {
-  if (amount === null) {
-    return "Price pending";
-  }
+function formatAmount(amount: string | null) {
+  if (amount === null) return "Price pending";
 
-  return `KES ${Number(amount).toLocaleString(
-    "en-KE",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  )}`;
+  return `KES ${Number(amount).toLocaleString("en-KE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 function DetailItem({
@@ -93,45 +95,84 @@ function DetailItem({
   value: string;
 }) {
   return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+    <div className="min-w-0">
+      <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400 sm:text-[10px]">
         {label}
       </p>
-
-      <p className="mt-1 text-sm font-medium text-gray-700">
+      <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-slate-700 sm:text-sm">
         {value}
       </p>
     </div>
   );
 }
 
+function InfoCard({
+  title,
+  subtitle,
+  icon: Icon,
+  color,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  icon: React.ElementType;
+  color: "blue" | "sky" | "orange" | "amber" | "green" | "purple" | "red" | "cyan" | "indigo";
+  children: React.ReactNode;
+}) {
+  const styles = {
+    blue: "border-blue-100 bg-blue-50 text-blue-700",
+    sky: "border-sky-100 bg-sky-50 text-sky-700",
+    orange: "border-orange-100 bg-orange-50 text-orange-700",
+    amber: "border-amber-100 bg-amber-50 text-amber-700",
+    green: "border-emerald-100 bg-emerald-50 text-emerald-700",
+    purple: "border-purple-100 bg-purple-50 text-purple-700",
+    red: "border-red-100 bg-red-50 text-red-700",
+    cyan: "border-cyan-100 bg-cyan-50 text-cyan-700",
+    indigo: "border-indigo-100 bg-indigo-50 text-indigo-700",
+  };
+
+  return (
+    <section className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center gap-3 border-b border-slate-100 px-3 py-3 sm:px-5 sm:py-4">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center border ${styles[color]}`}>
+          <Icon size={17} />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-sm font-extrabold text-[#061F35] sm:text-base">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="mt-0.5 text-[10px] text-slate-500 sm:text-xs">
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="p-3 sm:p-5">{children}</div>
+    </section>
+  );
+}
+
+function DetailGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-6">
+      {children}
+    </div>
+  );
+}
+
 export default function BookingDetailsPage() {
   const params = useParams();
-
   const bookingId = String(params.id);
 
-  const [booking, setBooking] =
-    useState<Booking | null>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const [showCancelForm, setShowCancelForm] =
-    useState(false);
-
-  const [
-    cancellationReason,
-    setCancellationReason,
-  ] = useState("");
-
-  const [cancelling, setCancelling] =
-    useState(false);
-
-  const [cancelError, setCancelError] =
-    useState<string | null>(null);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadBooking() {
@@ -139,9 +180,7 @@ export default function BookingDetailsPage() {
         setLoading(true);
         setError(null);
 
-        const data =
-          await getBooking(bookingId);
-
+        const data = await getBooking(bookingId);
         setBooking(data);
       } catch (error) {
         setError(
@@ -163,13 +202,10 @@ export default function BookingDetailsPage() {
       setCancelError(null);
 
       await cancelBooking(bookingId, {
-        reason:
-          cancellationReason.trim() || undefined,
+        reason: cancellationReason.trim() || undefined,
       });
 
-      const refreshedBooking =
-        await getBooking(bookingId);
-
+      const refreshedBooking = await getBooking(bookingId);
       setBooking(refreshedBooking);
 
       setShowCancelForm(false);
@@ -185,28 +221,13 @@ export default function BookingDetailsPage() {
     }
   }
 
-  /*
-   * ==========================================================
-   * LOADING
-   * ==========================================================
-   */
-
   if (loading) {
     return (
       <DashboardShell>
-        <div className="space-y-6">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
-              Customer Account
-            </p>
-
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#061F35] sm:text-3xl">
-              Booking Details
-            </h1>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-            <p className="text-sm text-gray-500">
+        <div className="flex min-h-[55vh] items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+            <p className="mt-3 text-xs text-slate-500">
               Loading booking details...
             </p>
           </div>
@@ -215,914 +236,667 @@ export default function BookingDetailsPage() {
     );
   }
 
-  /*
-   * ==========================================================
-   * ERROR
-   * ==========================================================
-   */
-
   if (error || !booking) {
     return (
       <DashboardShell>
-        <div className="space-y-6">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
-              Customer Account
-            </p>
-
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#061F35] sm:text-3xl">
-              Booking Details
-            </h1>
+        <div className="mx-auto max-w-3xl border border-red-200 bg-red-50 p-6 text-center sm:p-10">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center bg-red-100 text-red-600">
+            <Ban size={22} />
           </div>
-
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-10 text-center">
-            <h1 className="text-2xl font-bold text-red-900">
-              Booking not found
-            </h1>
-
-            <p className="mt-3 text-sm text-red-700">
-              {error ||
-                "We couldn't find this booking."}
-            </p>
-
-            <Link
-              href="/bookings"
-              className="mt-6 inline-flex rounded-xl bg-[#061F35] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#082B49]"
-            >
-              ← Back to Bookings
-            </Link>
-          </div>
+          <h1 className="mt-4 text-xl font-extrabold text-red-900">
+            Booking not found
+          </h1>
+          <p className="mt-2 text-sm text-red-700">
+            {error || "We couldn't find this booking."}
+          </p>
+          <Link
+            href="/bookings"
+            className="mt-5 inline-flex items-center gap-2 bg-[#061F35] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#0b3455]"
+          >
+            <ArrowLeft size={15} />
+            Back to Bookings
+          </Link>
         </div>
       </DashboardShell>
     );
   }
 
-  const category =
-    booking.service.category;
+  const category = booking.service.category;
+  const categoryStyle =
+    categoryStyles[category as keyof typeof categoryStyles];
+
+  const canCancel =
+    booking.status !== "CANCELLED" &&
+    booking.status !== "COMPLETED" &&
+    booking.status !== "IN_PROGRESS";
 
   return (
     <DashboardShell>
-      <div className="space-y-7">
+      <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 pb-24 sm:space-y-5 sm:px-6 sm:py-6 lg:px-8 lg:pb-8">
 
-        {/* =====================================================
-            PAGE HEADER
-        ===================================================== */}
-
-        <div>
-          <Link
-            href="/bookings"
-            className="inline-flex items-center text-sm font-semibold text-blue-600 transition hover:text-blue-700"
-          >
-            ← Back to My Bookings
-          </Link>
-
-          <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        {/* COMPACT WELCOME BANNER */}
+        <section className="relative overflow-hidden border-l-4 border-sky-400 bg-[#061F35] px-4 py-3 shadow-sm sm:px-5">
+          <div className="pointer-events-none absolute -right-5 -top-8 h-24 w-24 rounded-full border-[13px] border-white/[0.05]" />
+          <div className="relative flex items-center justify-between gap-3">
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${categoryStyles[category]}`}
-                >
-                  {formatCategory(category)}
-                </span>
-
-                <span
-                  className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${statusStyles[booking.status]}`}
-                >
-                  {formatStatus(
-                    booking.status
-                  )}
-                </span>
-              </div>
-
-              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#061F35] sm:text-4xl">
-                {booking.service.name}
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-sky-300">
+                Customer workspace
+              </p>
+              <h1 className="mt-1 text-base font-extrabold text-white sm:text-lg">
+                Booking Details
               </h1>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Booking #
-                {booking.bookingNumber}
+              <p className="mt-0.5 text-[10px] text-slate-300 sm:text-xs">
+                Everything about your service appointment in one place.
               </p>
             </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/10 bg-white/10 text-sky-200">
+              <ClipboardList size={19} />
+            </div>
+          </div>
+        </section>
 
-            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm sm:min-w-[190px] sm:text-right">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+        {/* BOOKING INTRO */}
+        <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <Link
+              href="/bookings"
+              className="mb-3 inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-600 transition hover:text-blue-800"
+            >
+              <ArrowLeft size={14} />
+              My Bookings
+            </Link>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`border px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wide ${categoryStyle.badge}`}>
+                {formatCategory(category)}
+              </span>
+              <span className={`border px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wide ${statusStyles[booking.status]}`}>
+                {formatStatus(booking.status)}
+              </span>
+            </div>
+
+            <h2 className="mt-2 text-xl font-extrabold tracking-tight text-[#061F35] sm:text-2xl">
+              {booking.service.name}
+            </h2>
+            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+              Booking #{booking.bookingNumber}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 border border-emerald-200 bg-emerald-50 px-4 py-3 sm:min-w-[190px] sm:justify-start">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-700">
                 Total Amount
               </p>
-
-              <p className="mt-1 text-lg font-extrabold text-[#061F35]">
-                {formatAmount(
-                  booking.totalAmount
-                )}
+              <p className="mt-1 text-base font-extrabold text-emerald-900 sm:text-lg">
+                {formatAmount(booking.totalAmount)}
               </p>
             </div>
+            <Wallet size={21} className="text-emerald-600" />
           </div>
         </div>
 
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
+        {/* MAIN CONTENT */}
+        <div className="grid gap-4 lg:grid-cols-[1.55fr_1fr] lg:gap-5">
 
-        <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+          {/* LEFT COLUMN */}
+          <div className="min-w-0 space-y-4">
 
-          {/* ===================================================
-              LEFT COLUMN
-          =================================================== */}
-
-          <div className="space-y-6">
-
-            {/* Service */}
-
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                Service
-              </p>
-
-              <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                {booking.service.name}
-              </h2>
-
+            {/* SERVICE */}
+            <InfoCard
+              title="Service Information"
+              subtitle="The service you requested"
+              icon={Sparkles}
+              color={
+                category === "CLEANING"
+                  ? "sky"
+                  : category === "MOVING"
+                    ? "orange"
+                    : "amber"
+              }
+            >
               {booking.service.description && (
-                <p className="mt-2 text-sm leading-6 text-gray-500">
+                <p className="mb-5 text-xs leading-6 text-slate-600">
                   {booking.service.description}
                 </p>
               )}
 
-              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+              <DetailGrid>
                 <DetailItem
                   label="Category"
-                  value={formatCategory(
-                    booking.service.category
-                  )}
+                  value={formatCategory(booking.service.category)}
                 />
-
                 <DetailItem
                   label="Pricing"
                   value={
-                    booking.service
-                      .pricingType ===
-                    "QUOTE"
+                    booking.service.pricingType === "QUOTE"
                       ? "Quote required"
-                      : booking.service
-                            .pricingType ===
-                        "FIXED"
+                      : booking.service.pricingType === "FIXED"
                         ? "Fixed price"
                         : "Calculated"
                   }
                 />
-
                 <DetailItem
                   label="Duration"
                   value={
-                    booking.service
-                      .duration
-                      ? `Approx. ${Math.round(
-                          booking.service
-                            .duration / 60
-                        )} hours`
+                    booking.service.duration
+                      ? `Approx. ${Math.round(booking.service.duration / 60)} hours`
                       : "Duration varies"
                   }
                 />
-
                 <DetailItem
                   label="Booking Type"
                   value={
-                    booking.bookingType ===
-                    "INSTANT"
+                    booking.bookingType === "INSTANT"
                       ? "Instant booking"
                       : "Quote request"
                   }
                 />
-              </div>
-            </section>
+              </DetailGrid>
+            </InfoCard>
 
-            {/* Schedule */}
-
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                Schedule
-              </p>
-
-              <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                Service appointment
-              </h2>
-
-              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            {/* SCHEDULE */}
+            <InfoCard
+              title="Schedule"
+              subtitle="Your appointment details"
+              icon={CalendarDays}
+              color="purple"
+            >
+              <DetailGrid>
                 <DetailItem
-                  label="Date"
-                  value={formatDate(
-                    booking.scheduledDate
-                  )}
+                  label="Appointment Date"
+                  value={formatDate(booking.scheduledDate)}
                 />
-
                 <DetailItem
-                  label="Time"
-                  value={
-                    booking.scheduledTime
-                  }
+                  label="Appointment Time"
+                  value={booking.scheduledTime}
                 />
+              </DetailGrid>
+            </InfoCard>
+
+            {/* ADDRESS */}
+            <InfoCard
+              title="Service Location"
+              subtitle="Where the service will take place"
+              icon={MapPin}
+              color="green"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-emerald-100 text-emerald-700">
+                  <Home size={17} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-slate-800">
+                    {booking.address.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    {booking.address.addressLine}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    {booking.address.city}, {booking.address.county}
+                  </p>
+                </div>
               </div>
-            </section>
+            </InfoCard>
 
-            {/* Address */}
-
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                Service Location
-              </p>
-
-              <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                {booking.address.label}
-              </h2>
-
-              <div className="mt-5 text-sm leading-6 text-gray-600">
-                <p>
-                  {booking.address.addressLine}
-                </p>
-
-                <p>
-                  {booking.address.city},{" "}
-                  {booking.address.county}
-                </p>
-              </div>
-            </section>
-
-            {/* Notes */}
-
+            {/* CUSTOMER NOTES */}
             {booking.notes && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Notes
-                </p>
-
-                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-gray-600">
+              <InfoCard
+                title="Additional Notes"
+                subtitle="Instructions provided with your booking"
+                icon={FileText}
+                color="indigo"
+              >
+                <p className="whitespace-pre-line text-xs leading-6 text-slate-600">
                   {booking.notes}
                 </p>
-              </section>
+              </InfoCard>
             )}
 
-            {/* =================================================
-                CLEANING DETAILS
-            ================================================= */}
-
+            {/* CLEANING REQUEST */}
             {booking.cleaningRequest && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Cleaning Details
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                  Property information
-                </h2>
-
-                <div className="mt-6 grid gap-5 sm:grid-cols-2">
+              <InfoCard
+                title="Cleaning Details"
+                subtitle="Property and cleaning requirements"
+                icon={Sparkles}
+                color="sky"
+              >
+                <DetailGrid>
                   <DetailItem
                     label="Property Type"
-                    value={
-                      booking
-                        .cleaningRequest
-                        .propertyType
-                    }
+                    value={booking.cleaningRequest.propertyType}
                   />
-
                   <DetailItem
                     label="Cleaning Type"
-                    value={
-                      booking
-                        .cleaningRequest
-                        .cleaningType
-                    }
+                    value={booking.cleaningRequest.cleaningType}
                   />
-
                   <DetailItem
                     label="Bedrooms"
                     value={
-                      booking
-                        .cleaningRequest
-                        .bedrooms !==
-                      null
-                        ? String(
-                            booking
-                              .cleaningRequest
-                              .bedrooms
-                          )
+                      booking.cleaningRequest.bedrooms !== null
+                        ? String(booking.cleaningRequest.bedrooms)
                         : "Not specified"
                     }
                   />
-
                   <DetailItem
                     label="Bathrooms"
                     value={
-                      booking
-                        .cleaningRequest
-                        .bathrooms !==
-                      null
-                        ? String(
-                            booking
-                              .cleaningRequest
-                              .bathrooms
-                          )
+                      booking.cleaningRequest.bathrooms !== null
+                        ? String(booking.cleaningRequest.bathrooms)
                         : "Not specified"
                     }
                   />
-
                   <DetailItem
                     label="Square Metres"
                     value={
-                      booking
-                        .cleaningRequest
-                        .squareMeters
+                      booking.cleaningRequest.squareMeters
                         ? `${booking.cleaningRequest.squareMeters} m²`
                         : "Not specified"
                     }
                   />
-                </div>
+                </DetailGrid>
 
-                {booking.cleaningRequest
-                  .additionalRequirements && (
-                  <div className="mt-6 border-t border-gray-100 pt-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                      Additional Requirements
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      {
-                        booking
-                          .cleaningRequest
-                          .additionalRequirements
-                      }
-                    </p>
+                {booking.cleaningRequest.additionalRequirements && (
+                  <div className="mt-5 border-t border-sky-100 pt-4">
+                    <DetailItem
+                      label="Additional Requirements"
+                      value={booking.cleaningRequest.additionalRequirements}
+                    />
                   </div>
                 )}
-              </section>
+              </InfoCard>
             )}
 
-            {/* =================================================
-                MOVING DETAILS
-            ================================================= */}
-
+            {/* MOVING REQUEST */}
             {booking.movingRequest && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-green-600">
-                  Moving Details
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                  Moving information
-                </h2>
-
-                <div className="mt-6 space-y-5">
-                  <DetailItem
-                    label="Pickup Address"
-                    value={
-                      booking.movingRequest
-                        .pickupAddress
-                    }
-                  />
-
-                  <DetailItem
-                    label="Destination"
-                    value={
-                      booking.movingRequest
-                        .destinationAddress
-                    }
-                  />
-
-                  <div className="grid gap-5 sm:grid-cols-2">
+              <InfoCard
+                title="Moving Details"
+                subtitle="Pickup, destination and moving requirements"
+                icon={Truck}
+                color="orange"
+              >
+                <div className="space-y-4">
+                  <div className="border-l-2 border-orange-300 pl-3">
+                    <DetailItem
+                      label="Pickup Address"
+                      value={booking.movingRequest.pickupAddress}
+                    />
+                  </div>
+                  <div className="border-l-2 border-emerald-300 pl-3">
+                    <DetailItem
+                      label="Destination"
+                      value={booking.movingRequest.destinationAddress}
+                    />
+                  </div>
+                  <DetailGrid>
                     <DetailItem
                       label="Property Type"
-                      value={
-                        booking.movingRequest
-                          .propertyType
-                      }
+                      value={booking.movingRequest.propertyType}
                     />
-
                     <DetailItem
                       label="Truck Size"
-                      value={
-                        booking.movingRequest
-                          .truckSize ||
-                        "Not specified"
-                      }
+                      value={booking.movingRequest.truckSize || "Not specified"}
                     />
-
                     <DetailItem
                       label="Number of Movers"
                       value={
-                        booking.movingRequest
-                          .numberOfMovers !==
-                        null
-                          ? String(
-                              booking
-                                .movingRequest
-                                .numberOfMovers
-                            )
+                        booking.movingRequest.numberOfMovers !== null
+                          ? String(booking.movingRequest.numberOfMovers)
                           : "Not specified"
                       }
                     />
-
                     <DetailItem
                       label="Packing"
                       value={
-                        booking.movingRequest
-                          .packingRequired
+                        booking.movingRequest.packingRequired
                           ? "Required"
                           : "Not required"
                       }
                     />
-                  </div>
+                  </DetailGrid>
 
-                  {booking.movingRequest
-                    .estimatedDistanceKm && (
+                  {booking.movingRequest.estimatedDistanceKm && (
                     <DetailItem
                       label="Estimated Distance"
                       value={`${booking.movingRequest.estimatedDistanceKm} km`}
                     />
                   )}
 
-                  {booking.movingRequest
-                    .specialItems && (
-                    <div className="border-t border-gray-100 pt-5">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                        Special Items
-                      </p>
-
-                      <p className="mt-2 text-sm leading-6 text-gray-600">
-                        {
-                          booking
-                            .movingRequest
-                            .specialItems
-                        }
-                      </p>
+                  {booking.movingRequest.specialItems && (
+                    <div className="border-t border-orange-100 pt-4">
+                      <DetailItem
+                        label="Special Items"
+                        value={booking.movingRequest.specialItems}
+                      />
                     </div>
                   )}
                 </div>
-              </section>
+              </InfoCard>
             )}
 
-            {/* =================================================
-                ELECTRICAL DETAILS
-            ================================================= */}
-
+            {/* ELECTRICAL REQUEST */}
             {booking.electricalRequest && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-600">
-                  Electrical Details
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                  Electrical requirements
-                </h2>
-
-                <div className="mt-6 grid gap-5 sm:grid-cols-2">
+              <InfoCard
+                title="Electrical Details"
+                subtitle="Property and electrical requirements"
+                icon={Zap}
+                color="amber"
+              >
+                <DetailGrid>
                   <DetailItem
                     label="Property Type"
-                    value={
-                      booking
-                        .electricalRequest
-                        .propertyType
-                    }
+                    value={booking.electricalRequest.propertyType}
                   />
-
                   <DetailItem
                     label="Floors"
                     value={
-                      booking
-                        .electricalRequest
-                        .numberOfFloors !==
-                      null
-                        ? String(
-                            booking
-                              .electricalRequest
-                              .numberOfFloors
-                          )
+                      booking.electricalRequest.numberOfFloors !== null
+                        ? String(booking.electricalRequest.numberOfFloors)
                         : "Not specified"
                     }
                   />
-
                   <DetailItem
                     label="Bedrooms"
                     value={
-                      booking
-                        .electricalRequest
-                        .bedrooms !==
-                      null
-                        ? String(
-                            booking
-                              .electricalRequest
-                              .bedrooms
-                          )
+                      booking.electricalRequest.bedrooms !== null
+                        ? String(booking.electricalRequest.bedrooms)
                         : "Not specified"
                     }
                   />
-
                   <DetailItem
                     label="Sockets"
                     value={
-                      booking
-                        .electricalRequest
-                        .numberOfSockets !==
-                      null
-                        ? String(
-                            booking
-                              .electricalRequest
-                              .numberOfSockets
-                          )
+                      booking.electricalRequest.numberOfSockets !== null
+                        ? String(booking.electricalRequest.numberOfSockets)
                         : "Not specified"
                     }
                   />
-
                   <DetailItem
                     label="Lights"
                     value={
-                      booking
-                        .electricalRequest
-                        .numberOfLights !==
-                      null
-                        ? String(
-                            booking
-                              .electricalRequest
-                              .numberOfLights
-                          )
+                      booking.electricalRequest.numberOfLights !== null
+                        ? String(booking.electricalRequest.numberOfLights)
                         : "Not specified"
                     }
                   />
-
                   <DetailItem
                     label="New Installation"
                     value={
-                      booking
-                        .electricalRequest
-                        .newInstallation
+                      booking.electricalRequest.newInstallation
                         ? "Yes"
                         : "No"
                     }
                   />
-
                   <DetailItem
                     label="Rewiring"
                     value={
-                      booking
-                        .electricalRequest
-                        .rewiring
-                        ? "Yes"
-                        : "No"
+                      booking.electricalRequest.rewiring ? "Yes" : "No"
                     }
                   />
-
                   <DetailItem
                     label="Distribution Board"
                     value={
-                      booking
-                        .electricalRequest
-                        .distributionBoard
+                      booking.electricalRequest.distributionBoard
                         ? "Required"
                         : "Not required"
                     }
                   />
-                </div>
+                </DetailGrid>
 
-                {booking
-                  .electricalRequest
-                  .additionalRequirements && (
-                  <div className="mt-6 border-t border-gray-100 pt-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                      Additional Requirements
-                    </p>
-
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      {
-                        booking
-                          .electricalRequest
-                          .additionalRequirements
-                      }
-                    </p>
+                {booking.electricalRequest.additionalRequirements && (
+                  <div className="mt-5 border-t border-amber-100 pt-4">
+                    <DetailItem
+                      label="Additional Requirements"
+                      value={booking.electricalRequest.additionalRequirements}
+                    />
                   </div>
                 )}
-              </section>
+              </InfoCard>
             )}
           </div>
 
-          {/* ===================================================
-              RIGHT COLUMN
-          =================================================== */}
+          {/* RIGHT COLUMN */}
+          <aside className="min-w-0 space-y-4">
 
-          <aside className="space-y-6">
+            {/* STATUS */}
+            <InfoCard
+              title="Booking Status"
+              subtitle="Current progress of your request"
+              icon={CheckCircle2}
+              color="blue"
+            >
+              <span className={`inline-flex border px-3 py-2 text-[10px] font-extrabold uppercase tracking-wide ${statusStyles[booking.status]}`}>
+                {formatStatus(booking.status)}
+              </span>
 
-            {/* Booking Status */}
-
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                Booking Status
-              </p>
-
-              <div className="mt-4">
-                <span
-                  className={`inline-flex rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wide ${statusStyles[booking.status]}`}
-                >
-                  {formatStatus(
-                    booking.status
-                  )}
-                </span>
-              </div>
-
-              <div className="mt-6 border-t border-gray-100 pt-5">
+              <div className="mt-4 border-t border-slate-100 pt-4">
                 <DetailItem
                   label="Booking Number"
-                  value={
-                    booking.bookingNumber
-                  }
+                  value={booking.bookingNumber}
                 />
               </div>
-            </section>
+            </InfoCard>
 
-            {/* Cancel Booking */}
+            {/* CANCELLATION */}
+            {canCancel && (
+              <InfoCard
+                title="Manage Booking"
+                subtitle="Booking cancellation options"
+                icon={Ban}
+                color="red"
+              >
+                {!showCancelForm ? (
+                  <>
+                    <h3 className="text-sm font-bold text-slate-800">
+                      Need to cancel?
+                    </h3>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      You can cancel this booking before the service is completed.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCancelForm(true);
+                        setCancelError(null);
+                      }}
+                      className="mt-4 w-full border border-red-200 px-4 py-3 text-xs font-bold text-red-700 transition hover:bg-red-50"
+                    >
+                      Cancel Booking
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-sm font-bold text-slate-800">
+                      Cancel this booking?
+                    </h3>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Please provide a reason if you would like to.
+                    </p>
 
-            {booking.status !== "CANCELLED" &&
-              booking.status !== "COMPLETED" &&
-              booking.status !== "IN_PROGRESS" && (
-                <section className="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.25em] text-red-600">
-                    Manage Booking
-                  </p>
-
-                  {!showCancelForm ? (
-                    <>
-                      <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                        Need to cancel?
-                      </h2>
-
-                      <p className="mt-2 text-sm leading-6 text-gray-500">
-                        You can cancel this
-                        booking before the
-                        service is completed.
+                    <div className="mt-4">
+                      <label
+                        htmlFor="cancellationReason"
+                        className="mb-2 block text-xs font-bold text-slate-700"
+                      >
+                        Reason <span className="font-normal text-slate-400">(optional)</span>
+                      </label>
+                      <textarea
+                        id="cancellationReason"
+                        value={cancellationReason}
+                        onChange={(event) =>
+                          setCancellationReason(event.target.value)
+                        }
+                        maxLength={500}
+                        rows={4}
+                        placeholder="Why are you cancelling?"
+                        className="w-full resize-none border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-800 outline-none transition focus:border-red-400 focus:bg-white"
+                      />
+                      <p className="mt-1 text-right text-[10px] text-slate-400">
+                        {cancellationReason.length}/500
                       </p>
+                    </div>
+
+                    {cancelError && (
+                      <div className="mt-3 border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                        {cancelError}
+                      </div>
+                    )}
+
+                    <div className="mt-4 space-y-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelBooking}
+                        disabled={cancelling}
+                        className="flex w-full items-center justify-center gap-2 bg-red-600 px-4 py-3 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+                      >
+                        {cancelling ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Cancelling...
+                          </>
+                        ) : (
+                          "Confirm Cancellation"
+                        )}
+                      </button>
 
                       <button
                         type="button"
                         onClick={() => {
-                          setShowCancelForm(
-                            true
-                          );
+                          setShowCancelForm(false);
+                          setCancellationReason("");
                           setCancelError(null);
                         }}
-                        className="mt-5 w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                        disabled={cancelling}
+                        className="w-full border border-slate-200 px-4 py-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                       >
-                        Cancel Booking
+                        Keep Booking
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                        Cancel this booking?
-                      </h2>
+                    </div>
+                  </>
+                )}
+              </InfoCard>
+            )}
 
-                      <p className="mt-2 text-sm leading-6 text-gray-500">
-                        This action will
-                        cancel your booking.
-                      </p>
-
-                      <div className="mt-5">
-                        <label
-                          htmlFor="cancellationReason"
-                          className="mb-2 block text-sm font-semibold text-gray-700"
-                        >
-                          Reason{" "}
-                          <span className="font-normal text-gray-400">
-                            (optional)
-                          </span>
-                        </label>
-
-                        <textarea
-                          id="cancellationReason"
-                          value={
-                            cancellationReason
-                          }
-                          onChange={(event) =>
-                            setCancellationReason(
-                              event.target.value
-                            )
-                          }
-                          maxLength={500}
-                          rows={4}
-                          placeholder="Why are you cancelling?"
-                          className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-400 focus:bg-white"
-                        />
-
-                        <p className="mt-1 text-right text-xs text-gray-400">
-                          {
-                            cancellationReason.length
-                          }
-                          /500
-                        </p>
-                      </div>
-
-                      {cancelError && (
-                        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                          {cancelError}
-                        </div>
-                      )}
-
-                      <div className="mt-5 flex flex-col gap-3">
-                        <button
-                          type="button"
-                          onClick={
-                            handleCancelBooking
-                          }
-                          disabled={cancelling}
-                          className="w-full rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {cancelling
-                            ? "Cancelling..."
-                            : "Confirm Cancellation"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowCancelForm(
-                              false
-                            );
-                            setCancellationReason(
-                              ""
-                            );
-                            setCancelError(null);
-                          }}
-                          disabled={cancelling}
-                          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Keep Booking
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </section>
-              )}
-
-            {/* Quote */}
-
+            {/* QUOTE */}
             {booking.quote && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Quote
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                  Quote information
-                </h2>
-
-                <div className="mt-5 space-y-5">
+              <InfoCard
+                title="Quote Information"
+                subtitle="Pricing details for this service"
+                icon={Receipt}
+                color="purple"
+              >
+                <div className="space-y-4">
                   <DetailItem
-                    label="Status"
-                    value={
-                      booking.quote.status
-                    }
+                    label="Quote Status"
+                    value={booking.quote.status}
                   />
-
                   <DetailItem
                     label="Estimated Amount"
                     value={
-                      booking.quote
-                        .estimatedAmount
-                        ? `KES ${Number(
-                            booking.quote
-                              .estimatedAmount
-                          ).toLocaleString(
-                            "en-KE"
-                          )}`
+                      booking.quote.estimatedAmount
+                        ? `KES ${Number(booking.quote.estimatedAmount).toLocaleString("en-KE")}`
                         : "Not available"
                     }
                   />
-
                   <DetailItem
                     label="Final Amount"
                     value={
-                      booking.quote
-                        .finalAmount
-                        ? `KES ${Number(
-                            booking.quote
-                              .finalAmount
-                          ).toLocaleString(
-                            "en-KE"
-                          )}`
+                      booking.quote.finalAmount
+                        ? `KES ${Number(booking.quote.finalAmount).toLocaleString("en-KE")}`
                         : "Not available"
                     }
                   />
                 </div>
-              </section>
+              </InfoCard>
             )}
 
-            {/* Payment */}
-
+            {/* PAYMENT */}
             {booking.payment && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Payment
-                </p>
-
-                <h2 className="mt-2 text-xl font-bold text-[#061F35]">
-                  Payment information
-                </h2>
-
-                <div className="mt-5 space-y-5">
+              <InfoCard
+                title="Payment Information"
+                subtitle="Transaction details"
+                icon={CreditCard}
+                color="green"
+              >
+                <div className="space-y-4">
                   <DetailItem
-                    label="Status"
-                    value={
-                      booking.payment.status
-                    }
+                    label="Payment Status"
+                    value={booking.payment.status}
                   />
-
                   <DetailItem
-                    label="Method"
-                    value={
-                      booking.payment.method
-                    }
+                    label="Payment Method"
+                    value={booking.payment.method}
                   />
-
                   <DetailItem
-                    label="Amount"
-                    value={`KES ${Number(
-                      booking.payment.amount
-                    ).toLocaleString(
-                      "en-KE"
-                    )}`}
+                    label="Amount Paid"
+                    value={`KES ${Number(booking.payment.amount).toLocaleString("en-KE")}`}
                   />
-
-                  {booking.payment
-                    .transactionId && (
+                  {booking.payment.transactionId && (
                     <DetailItem
-                      label="Transaction"
-                      value={
-                        booking.payment
-                          .transactionId
-                      }
+                      label="Transaction ID"
+                      value={booking.payment.transactionId}
                     />
                   )}
                 </div>
-              </section>
+              </InfoCard>
             )}
 
-            {/* Staff */}
-
+            {/* ASSIGNED STAFF */}
             {(booking.staffAssignments?.length ?? 0) > 0 && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Assigned Staff
-                </p>
-
-                <div className="mt-5 space-y-4">
-                  {(booking.staffAssignments ?? []).map(
-                    (assignment) => (
-                      <div
-                        key={
-                          assignment.id
-                        }
-                        className="rounded-xl bg-gray-50 p-4"
-                      >
-                        <p className="font-semibold text-[#061F35]">
-                          {
-                            assignment.staff
-                              .user
-                              .name
-                          }
-                        </p>
-
-                        <p className="mt-1 text-xs uppercase tracking-wide text-gray-400">
-                          {
-                            assignment.staff
-                              .staffType
-                          }
-                        </p>
+              <InfoCard
+                title="Assigned Staff"
+                subtitle="Team members assigned to your service"
+                icon={Users}
+                color="cyan"
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  {(booking.staffAssignments ?? []).map((assignment) => (
+                    <div
+                      key={assignment.id}
+                      className="min-w-0 border border-cyan-100 bg-cyan-50/60 p-3"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center bg-cyan-100 text-cyan-700">
+                        <Users size={15} />
                       </div>
+                      <p className="mt-2 break-words text-xs font-bold text-slate-800">
+                        {assignment.staff.user.name}
+                      </p>
+                      <p className="mt-1 text-[9px] font-bold uppercase tracking-wide text-cyan-700">
+                        {assignment.staff.staffType}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </InfoCard>
+            )}
+
+            {/* REVIEW */}
+            {booking.review && (
+              <InfoCard
+                title="Your Review"
+                subtitle="Feedback submitted for this booking"
+                icon={Star}
+                color="amber"
+              >
+                <div className="flex items-center gap-1 text-amber-500">
+                  {Array.from(
+                    { length: booking.review.rating },
+                    (_, index) => (
+                      <Star
+                        key={index}
+                        size={17}
+                        fill="currentColor"
+                      />
                     )
                   )}
                 </div>
-              </section>
-            )}
 
-            {/* Review */}
-
-            {booking.review && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">
-                  Review
-                </p>
-
-                <div className="mt-4">
-                  <p className="text-lg font-bold text-amber-500">
-                    {"★".repeat(
-                      booking.review.rating
-                    )}
+                {booking.review.comment && (
+                  <p className="mt-3 border-l-2 border-amber-300 pl-3 text-xs leading-6 text-slate-600">
+                    {booking.review.comment}
                   </p>
-
-                  {booking.review.comment && (
-                    <p className="mt-3 text-sm leading-6 text-gray-600">
-                      {
-                        booking.review.comment
-                      }
-                    </p>
-                  )}
-                </div>
-              </section>
+                )}
+              </InfoCard>
             )}
           </aside>
         </div>

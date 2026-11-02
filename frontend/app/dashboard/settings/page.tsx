@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,6 +14,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Lock,
+  Settings,
+  Bell,
+  Smartphone,
+  Megaphone,
+  ShieldCheck,
+  UserRound,
 } from "lucide-react";
 
 import DashboardShell from "@/components/dashboard/DashboardShell";
@@ -44,6 +51,37 @@ const sections = [
   { id: "security", label: "Security" },
   { id: "account", label: "Account" },
 ];
+
+function SectionHeading({
+  icon: Icon,
+  title,
+  description,
+  color,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  color: string;
+}) {
+  return (
+    <div className="mb-5 flex items-center gap-3">
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${color}`}
+      >
+        <Icon size={19} />
+      </div>
+
+      <div className="min-w-0">
+        <h3 className="text-sm font-extrabold text-slate-900 sm:text-base">
+          {title}
+        </h3>
+        <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500 sm:text-xs">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function CustomerSettingsPage() {
   const [profile, setProfile] =
@@ -158,10 +196,9 @@ export default function CustomerSettingsPage() {
     try {
       setSavingSettings(true);
 
-      const updated =
-        await updateMySettings({
-          [field]: value,
-        });
+      const updated = await updateMySettings({
+        [field]: value,
+      });
 
       setSettings(updated);
 
@@ -177,53 +214,53 @@ export default function CustomerSettingsPage() {
     }
   }
 
-   async function handleChangePassword() {
-  if (!currentPassword) {
-    showError("Enter your current password.");
-    return;
+  async function handleChangePassword() {
+    if (!currentPassword) {
+      showError("Enter your current password.");
+      return;
+    }
+
+    if (!newPassword) {
+      showError("Enter a new password.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showError(
+        "Your new password must be at least 8 characters."
+      );
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+
+      await changeMyPassword(
+        currentPassword,
+        newPassword,
+        confirmPassword
+      );
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      showSuccess("Password changed successfully.");
+    } catch (err) {
+      showError(
+        err instanceof Error
+          ? err.message
+          : "Failed to change your password."
+      );
+    } finally {
+      setChangingPassword(false);
+    }
   }
-
-  if (!newPassword) {
-    showError("Enter a new password.");
-    return;
-  }
-
-  if (newPassword.length < 8) {
-    showError(
-      "Your new password must be at least 8 characters."
-    );
-    return;
-  }
-
-  if (newPassword !== confirmPassword) {
-    showError("Passwords do not match.");
-    return;
-  }
-
-  try {
-    setChangingPassword(true);
-
-    await changeMyPassword(
-      currentPassword,
-      newPassword,
-      confirmPassword
-    );
-
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-
-    showSuccess("Password changed successfully.");
-  } catch (err) {
-    showError(
-      err instanceof Error
-        ? err.message
-        : "Failed to change your password."
-    );
-  } finally {
-    setChangingPassword(false);
-  }
-}
 
   async function handleDeleteAccount() {
     const confirmed = window.confirm(
@@ -253,9 +290,11 @@ export default function CustomerSettingsPage() {
     return (
       <DashboardShell>
         <div className="flex min-h-[500px] items-center justify-center">
-          <div className="flex items-center gap-3 text-gray-600">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Loading your settings...
+          <div className="text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-700" />
+            <p className="mt-3 text-xs text-slate-500">
+              Loading your settings...
+            </p>
           </div>
         </div>
       </DashboardShell>
@@ -265,48 +304,74 @@ export default function CustomerSettingsPage() {
   if (!profile || !settings) {
     return (
       <DashboardShell>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-800">
+        <div className="border border-red-200 bg-red-50 p-5 text-sm text-red-800">
           Unable to load your settings.
         </div>
       </DashboardShell>
     );
   }
 
+  const firstName = profile.name?.split(" ")[0] || "there";
+
   return (
     <DashboardShell>
-      <div className="space-y-6">
+      <div className="mx-auto max-w-6xl space-y-5 px-3 py-4 pb-24 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8 lg:pb-8">
 
-        {/* HEADER */}
+        {/* COMPACT WELCOME BANNER */}
+        <section className="relative overflow-hidden border-l-4 border-sky-400 bg-[#061F35] px-4 py-3.5 shadow-sm sm:px-5">
+          <div className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full border-[16px] border-white/[0.04]" />
+
+          <div className="relative flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-sky-300 sm:text-[10px]">
+                Customer account
+              </p>
+
+              <h1 className="mt-1 text-lg font-extrabold text-white sm:text-xl">
+                Your Settings, {firstName}
+              </h1>
+
+              <p className="mt-1 text-[11px] text-slate-300 sm:text-xs">
+                Personalize your HomeServe experience.
+              </p>
+            </div>
+
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-sky-200">
+              <Settings size={21} />
+            </div>
+          </div>
+        </section>
+
+        {/* PAGE INTRODUCTION */}
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-blue-50 p-3">
-            <User className="h-6 w-6 text-[#061F35]" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+            <User size={20} />
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-[#061F35]">
-              Settings
-            </h1>
+            <h2 className="text-base font-extrabold text-[#061F35] sm:text-lg">
+              Account Settings
+            </h2>
 
-            <p className="text-sm text-gray-600">
-              Manage your HomeServe profile,
-              preferences, notifications and security.
+            <p className="text-[10px] text-slate-500 sm:text-xs">
+              Manage your profile, preferences, notifications and security.
             </p>
           </div>
         </div>
 
-        {/* SUCCESS */}
+        {/* SUCCESS MESSAGE */}
         {success && (
-          <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+          <div className="flex items-start gap-3 border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-800">
             <CheckCircle2 className="h-5 w-5 shrink-0" />
-            {success}
+            <p>{success}</p>
           </div>
         )}
 
-        {/* ERROR */}
+        {/* ERROR MESSAGE */}
         {error && (
-          <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
+          <div className="flex items-start gap-3 border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium text-red-800">
             <AlertCircle className="h-5 w-5 shrink-0" />
-            {error}
+            <p>{error}</p>
           </div>
         )}
 
@@ -316,395 +381,397 @@ export default function CustomerSettingsPage() {
           sections={sections}
         >
           {(activeSection) => (
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-5">
 
-              {/* ================= PROFILE ================= */}
-
+              {/* PROFILE */}
               {activeSection === "profile" && (
-                <SettingSection
-                  title="Profile Information"
-                  description="Update the personal information associated with your HomeServe account."
-                >
-                  <div className="space-y-5">
-
-                    <SettingInput
-                      label="Full Name"
-                      value={name}
-                      onChange={(value: string) =>
-                        setName(value)
-                      }
+                <div className="border border-violet-100 bg-white shadow-sm">
+                  <div className="border-b border-violet-100 bg-violet-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={UserRound}
+                      title="Profile Information"
+                      description="Update the personal information associated with your HomeServe account."
+                      color="bg-violet-100 text-violet-700"
                     />
-
-                    <SettingInput
-  label="Email Address"
-  type="email"
-  value={profile.email}
-  disabled
-  onChange={() => {}}
-  description="Your email address is used for account authentication and cannot be changed here."
-/>
-
-                    <SettingInput
-                      label="Phone Number"
-                      type="tel"
-                      value={phone}
-                      onChange={(value: string) =>
-                        setPhone(value)
-                      }
-                    />
-
-                    <button
-                      type="button"
-                      onClick={saveProfile}
-                      disabled={savingProfile}
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#061F35] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#082B49] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {savingProfile ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-4 w-4" />
-                          Save Profile
-                        </>
-                      )}
-                    </button>
-
                   </div>
-                </SettingSection>
+
+                  <div className="space-y-5 p-4 sm:p-5">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <SettingInput
+                          label="Full Name"
+                          value={name}
+                          onChange={(value: string) =>
+                            setName(value)
+                          }
+                        />
+                      </div>
+
+                      <div className="col-span-2 sm:col-span-1">
+                        <SettingInput
+                          label="Email Address"
+                          type="email"
+                          value={profile.email}
+                          disabled
+                          onChange={() => {}}
+                          description="Your email address cannot be changed here."
+                        />
+                      </div>
+
+                      <div className="col-span-2 sm:col-span-1">
+                        <SettingInput
+                          label="Phone Number"
+                          type="tel"
+                          value={phone}
+                          onChange={(value: string) =>
+                            setPhone(value)
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end border-t border-slate-100 pt-4">
+                      <button
+                        type="button"
+                        onClick={saveProfile}
+                        disabled={savingProfile}
+                        className="inline-flex items-center justify-center gap-2 bg-violet-700 px-5 py-3 text-xs font-bold text-white transition hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {savingProfile ? (
+                          <>
+                            <Loader2 size={15} className="animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save size={15} />
+                            Save Profile
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
 
-              {/* ================= PREFERENCES ================= */}
-
+              {/* PREFERENCES */}
               {activeSection === "preferences" && (
-                <SettingSection
-                  title="Preferences"
-                  description="Choose how HomeServe displays information for your account."
-                >
-                  <div className="space-y-5">
-
-                    <SettingInput
-                      label="Language"
-                      description="Your preferred language."
-                      value={settings.language}
-                      onChange={(value: string) =>
-                        updateSetting(
-                          "language",
-                          value
-                        )
-                      }
+                <div className="border border-sky-100 bg-white shadow-sm">
+                  <div className="border-b border-sky-100 bg-sky-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={Globe}
+                      title="Preferences"
+                      description="Choose how HomeServe displays information for your account."
+                      color="bg-sky-100 text-sky-700"
                     />
-
-                    <SettingInput
-                      label="Currency"
-                      description="Currency used when displaying prices."
-                      value={settings.currency}
-                      onChange={(value: string) =>
-                        updateSetting(
-                          "currency",
-                          value
-                        )
-                      }
-                    />
-
-                    <SettingInput
-                      label="Timezone"
-                      description="Timezone used for dates and booking times."
-                      value={settings.timezone}
-                      onChange={(value: string) =>
-                        updateSetting(
-                          "timezone",
-                          value
-                        )
-                      }
-                    />
-
                   </div>
-                </SettingSection>
+
+                  <div className="grid grid-cols-2 gap-4 p-4 sm:p-5">
+                    <div className="col-span-2 sm:col-span-1">
+                      <SettingInput
+                        label="Language"
+                        description="Your preferred language."
+                        value={settings.language}
+                        onChange={(value: string) =>
+                          updateSetting("language", value)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1">
+                      <SettingInput
+                        label="Currency"
+                        description="Currency used when displaying prices."
+                        value={settings.currency}
+                        onChange={(value: string) =>
+                          updateSetting("currency", value)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <SettingInput
+                        label="Timezone"
+                        description="Timezone used for dates and booking times."
+                        value={settings.timezone}
+                        onChange={(value: string) =>
+                          updateSetting("timezone", value)
+                        }
+                      />
+                    </div>
+
+                    {savingSettings && (
+                      <p className="col-span-2 flex items-center gap-2 text-[10px] text-sky-700">
+                        <Loader2 size={13} className="animate-spin" />
+                        Updating preferences...
+                      </p>
+                    )}
+                  </div>
+                </div>
               )}
 
-              {/* ================= EMAIL ================= */}
-
+              {/* EMAIL NOTIFICATIONS */}
               {activeSection === "email" && (
-                <SettingSection
-                  title="Email Notifications"
-                  description="Choose which HomeServe events you want to receive by email."
-                >
-                  <div className="space-y-4">
+                <div className="border border-blue-100 bg-white shadow-sm">
+                  <div className="border-b border-blue-100 bg-blue-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={Mail}
+                      title="Email Notifications"
+                      description="Choose which HomeServe events you want to receive by email."
+                      color="bg-blue-100 text-blue-700"
+                    />
+                  </div>
 
+                  <div className="space-y-3 p-4 sm:p-5">
                     <SettingToggle
                       label="Booking Updates"
                       description="Receive emails about booking creation, status changes and cancellations."
-                      enabled={
-                        settings.emailBookingUpdates
-                      }
+                      enabled={settings.emailBookingUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "emailBookingUpdates",
-                          value
-                        )
+                        updateSetting("emailBookingUpdates", value)
                       }
                     />
 
                     <SettingToggle
                       label="Quote Updates"
                       description="Receive notifications when quotes are created or updated."
-                      enabled={
-                        settings.emailQuoteUpdates
-                      }
+                      enabled={settings.emailQuoteUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "emailQuoteUpdates",
-                          value
-                        )
+                        updateSetting("emailQuoteUpdates", value)
                       }
                     />
 
                     <SettingToggle
                       label="Payment Updates"
                       description="Receive notifications about payment status and transactions."
-                      enabled={
-                        settings.emailPaymentUpdates
-                      }
+                      enabled={settings.emailPaymentUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "emailPaymentUpdates",
-                          value
-                        )
+                        updateSetting("emailPaymentUpdates", value)
                       }
                     />
 
                     <SettingToggle
                       label="Service Updates"
                       description="Receive important updates related to HomeServe services."
-                      enabled={
-                        settings.emailServiceUpdates
-                      }
+                      enabled={settings.emailServiceUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "emailServiceUpdates",
-                          value
-                        )
+                        updateSetting("emailServiceUpdates", value)
                       }
                     />
 
                     <SettingToggle
                       label="System Announcements"
                       description="Receive important platform announcements and service notices."
-                      enabled={
-                        settings.emailSystemAnnouncements
-                      }
+                      enabled={settings.emailSystemAnnouncements}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "emailSystemAnnouncements",
-                          value
-                        )
+                        updateSetting("emailSystemAnnouncements", value)
                       }
                     />
-
                   </div>
-                </SettingSection>
+                </div>
               )}
 
-              {/* ================= SMS ================= */}
-
+              {/* SMS NOTIFICATIONS */}
               {activeSection === "sms" && (
-                <SettingSection
-                  title="SMS Notifications"
-                  description="Choose which important HomeServe events you want to receive by SMS."
-                >
-                  <div className="space-y-4">
+                <div className="border border-emerald-100 bg-white shadow-sm">
+                  <div className="border-b border-emerald-100 bg-emerald-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={Smartphone}
+                      title="SMS Notifications"
+                      description="Choose which important HomeServe events you want to receive by SMS."
+                      color="bg-emerald-100 text-emerald-700"
+                    />
+                  </div>
 
+                  <div className="space-y-3 p-4 sm:p-5">
                     <SettingToggle
                       label="Booking Updates"
                       description="Receive SMS notifications about booking changes."
-                      enabled={
-                        settings.smsBookingUpdates
-                      }
+                      enabled={settings.smsBookingUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "smsBookingUpdates",
-                          value
-                        )
+                        updateSetting("smsBookingUpdates", value)
                       }
                     />
 
                     <SettingToggle
                       label="Quote Updates"
                       description="Receive SMS notifications about quote changes."
-                      enabled={
-                        settings.smsQuoteUpdates
-                      }
+                      enabled={settings.smsQuoteUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "smsQuoteUpdates",
-                          value
-                        )
+                        updateSetting("smsQuoteUpdates", value)
                       }
                     />
 
                     <SettingToggle
                       label="Payment Updates"
                       description="Receive SMS notifications about payment events."
-                      enabled={
-                        settings.smsPaymentUpdates
-                      }
+                      enabled={settings.smsPaymentUpdates}
                       disabled={savingSettings}
                       onChange={(value: boolean) =>
-                        updateSetting(
-                          "smsPaymentUpdates",
-                          value
-                        )
+                        updateSetting("smsPaymentUpdates", value)
                       }
                     />
-
                   </div>
-                </SettingSection>
+                </div>
               )}
 
-              {/* ================= MARKETING ================= */}
-
+              {/* MARKETING */}
               {activeSection === "marketing" && (
-                <SettingSection
-                  title="Marketing Communications"
-                  description="Control optional promotional communications from HomeServe."
-                >
-                  <SettingToggle
-                    label="Marketing Notifications"
-                    description="Receive optional information about promotions, offers and new services."
-                    enabled={
-                      settings.marketingNotifications
-                    }
-                    disabled={savingSettings}
-                    onChange={(value: boolean) =>
-                      updateSetting(
-                        "marketingNotifications",
-                        value
-                      )
-                    }
-                  />
-                </SettingSection>
-              )}
-
-              {/* ================= SECURITY ================= */}
-
-              {activeSection === "security" && (
-                <SettingSection
-                  title="Account Security"
-                  description="Change your account password."
-                >
-                  <div className="space-y-5">
-
-                    <SettingInput
-                      label="Current Password"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(value: string) =>
-                        setCurrentPassword(value)
-                      }
+                <div className="border border-orange-100 bg-white shadow-sm">
+                  <div className="border-b border-orange-100 bg-orange-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={Megaphone}
+                      title="Marketing Communications"
+                      description="Control optional promotional communications from HomeServe."
+                      color="bg-orange-100 text-orange-700"
                     />
-
-                    <SettingInput
-                      label="New Password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(value: string) =>
-                        setNewPassword(value)
-                      }
-                    />
-
-                    <SettingInput
-                      label="Confirm New Password"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(value: string) =>
-                        setConfirmPassword(value)
-                      }
-                    />
-
-                    <button
-                      type="button"
-                      onClick={handleChangePassword}
-                      disabled={changingPassword}
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#061F35] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#082B49] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {changingPassword ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Changing Password...
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="h-4 w-4" />
-                          Change Password
-                        </>
-                      )}
-                    </button>
-
                   </div>
-                </SettingSection>
+
+                  <div className="p-4 sm:p-5">
+                    <SettingToggle
+                      label="Marketing Notifications"
+                      description="Receive optional information about promotions, offers and new services."
+                      enabled={settings.marketingNotifications}
+                      disabled={savingSettings}
+                      onChange={(value: boolean) =>
+                        updateSetting("marketingNotifications", value)
+                      }
+                    />
+                  </div>
+                </div>
               )}
 
-              {/* ================= ACCOUNT ================= */}
+              {/* SECURITY */}
+              {activeSection === "security" && (
+                <div className="border border-indigo-100 bg-white shadow-sm">
+                  <div className="border-b border-indigo-100 bg-indigo-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={Shield}
+                      title="Account Security"
+                      description="Protect your account by keeping your password secure."
+                      color="bg-indigo-100 text-indigo-700"
+                    />
+                  </div>
 
-              {activeSection === "account" && (
-                <SettingSection
-                  title="Account Management"
-                  description="Manage your HomeServe account."
-                >
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-
-                    <div className="flex items-start gap-4">
-
-                      <div className="rounded-lg bg-red-100 p-3">
-                        <Trash2 className="h-5 w-5 text-red-700" />
+                  <div className="space-y-5 p-4 sm:p-5">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <SettingInput
+                          label="Current Password"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(value: string) =>
+                            setCurrentPassword(value)
+                          }
+                        />
                       </div>
 
-                      <div className="flex-1">
+                      <div className="col-span-2 sm:col-span-1">
+                        <SettingInput
+                          label="New Password"
+                          type="password"
+                          value={newPassword}
+                          onChange={(value: string) =>
+                            setNewPassword(value)
+                          }
+                        />
+                      </div>
 
-                        <h3 className="font-semibold text-red-900">
-                          Delete Account
-                        </h3>
-
-                        <p className="mt-1 text-sm leading-6 text-red-800">
-                          Permanently delete your HomeServe
-                          account. This action cannot be
-                          undone.
-                        </p>
-
-                        <button
-                          type="button"
-                          onClick={handleDeleteAccount}
-                          disabled={deletingAccount}
-                          className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {deletingAccount ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Deleting...
-                            </>
-                          ) : (
-                            <>
-                              <Trash2 className="h-4 w-4" />
-                              Delete My Account
-                            </>
-                          )}
-                        </button>
-
+                      <div className="col-span-2 sm:col-span-1">
+                        <SettingInput
+                          label="Confirm New Password"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(value: string) =>
+                            setConfirmPassword(value)
+                          }
+                        />
                       </div>
                     </div>
 
+                    <div className="flex justify-end border-t border-slate-100 pt-4">
+                      <button
+                        type="button"
+                        onClick={handleChangePassword}
+                        disabled={changingPassword}
+                        className="inline-flex items-center justify-center gap-2 bg-indigo-700 px-5 py-3 text-xs font-bold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {changingPassword ? (
+                          <>
+                            <Loader2 size={15} className="animate-spin" />
+                            Changing Password...
+                          </>
+                        ) : (
+                          <>
+                            <Lock size={15} />
+                            Change Password
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </SettingSection>
+                </div>
+              )}
+
+              {/* ACCOUNT MANAGEMENT */}
+              {activeSection === "account" && (
+                <div className="border border-red-200 bg-white shadow-sm">
+                  <div className="border-b border-red-100 bg-red-50 px-4 py-4 sm:px-5">
+                    <SectionHeading
+                      icon={ShieldCheck}
+                      title="Account Management"
+                      description="Manage your HomeServe account and account deletion."
+                      color="bg-red-100 text-red-700"
+                    />
+                  </div>
+
+                  <div className="p-4 sm:p-5">
+                    <div className="border border-red-200 bg-red-50/70 p-4 sm:p-5">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700">
+                          <Trash2 size={19} />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-extrabold text-red-950">
+                            Delete Account
+                          </h3>
+
+                          <p className="mt-1 text-[11px] leading-relaxed text-red-800 sm:text-xs">
+                            Permanently delete your HomeServe account.
+                            This action cannot be undone.
+                          </p>
+
+                          <button
+                            type="button"
+                            onClick={handleDeleteAccount}
+                            disabled={deletingAccount}
+                            className="mt-4 inline-flex items-center justify-center gap-2 border border-red-300 bg-white px-4 py-2.5 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {deletingAccount ? (
+                              <>
+                                <Loader2 size={14} className="animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 size={14} />
+                                Delete My Account
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
 
             </div>
