@@ -1,3 +1,5 @@
+
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -16,37 +18,30 @@ export default function AuthLayout({
     <main className="min-h-screen bg-sky-100">
       <div className="grid min-h-screen lg:grid-cols-[1.15fr_0.85fr]">
 
-        {/* =========================
-            LEFT BRANDING
-        ========================== */}
+        {/* LEFT BRANDING */}
         <section className="relative hidden min-h-screen overflow-hidden lg:flex">
-
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage:
-                "url('/images/homeserve-bg.jpg')",
+                "url('/images/homeserve-logo.webp')",
             }}
           />
 
           <div className="absolute inset-0 bg-sky-50/45" />
-
           <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-sky-100/30" />
 
           <div className="relative z-10 flex w-full flex-col justify-between px-10 py-10 xl:px-16">
 
-            {/* Logo */}
             <div>
               <img
-                src="/images/homeserve-logo.png"
+                src="/images/homeserve-logo.webp"
                 alt="HomeServe"
                 className="w-60 xl:w-64"
               />
             </div>
 
-            {/* Main branding */}
             <div className="max-w-xl">
-
               <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-600">
                 More Than Services
               </p>
@@ -54,7 +49,6 @@ export default function AuthLayout({
               <h2 className="text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 xl:text-6xl">
                 Your Home.
                 <br />
-
                 <span className="text-blue-600">
                   Our Expertise.
                 </span>
@@ -65,9 +59,7 @@ export default function AuthLayout({
                 electrical services at your convenience.
               </p>
 
-              {/* Services */}
               <div className="mt-7 grid max-w-2xl grid-cols-3 gap-3">
-
                 <ServiceCard
                   icon="✦"
                   title="Cleaning"
@@ -88,11 +80,9 @@ export default function AuthLayout({
                   description="Reliable electrical solutions"
                   iconStyle="bg-amber-100 text-amber-600"
                 />
-
               </div>
             </div>
 
-            {/* Trust indicators */}
             <div className="flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-700">
               <span>🛡 Trusted Professionals</span>
               <span>◷ On-Time Service</span>
@@ -102,26 +92,42 @@ export default function AuthLayout({
           </div>
         </section>
 
-        {/* =========================
-            RIGHT AUTH AREA
-        ========================== */}
-        <section className="flex min-h-screen items-center justify-center bg-sky-100 px-5 py-8 sm:px-8">
+        {/* RIGHT AUTH AREA */}
+        <section className="
+          flex min-h-screen
+          items-center justify-center
+          bg-sky-100
+          px-4 py-8
+          sm:px-8
+          lg:px-10
+        ">
 
-          <div className="w-full max-w-[390px]">
+          {/* Centered content wrapper */}
+          <div className="
+            flex w-full max-w-[390px]
+            flex-col items-center justify-center
+            my-auto
+          ">
 
-            {/* Mobile logo */}
-            <div className="mb-5 flex justify-center lg:hidden">
+            {/* MOBILE LOGO */}
+            <div className="mb-5 flex w-full justify-center lg:hidden">
               <img
-                src="/images/homeserve-logo.png"
+                src="/images/homeserve-logo.webp"
                 alt="HomeServe"
-                className="w-44"
+                className="w-40 sm:w-44"
               />
             </div>
 
-            {/* DARK BLUE FORM CARD */}
-            <div className="rounded-2xl bg-[#082B49] p-6 shadow-2xl shadow-blue-900/20 sm:p-7">
+            {/* AUTH CARD */}
+            <div className="
+              w-full rounded-2xl
+              bg-[#082B49]
+              p-5
+              shadow-2xl shadow-blue-900/20
+              sm:p-7
+            ">
 
-              {/* Top navigation */}
+              {/* TOP NAVIGATION */}
               <div className="mb-5 flex justify-end">
                 <p className="text-xs text-slate-300">
                   {isRegister
@@ -129,21 +135,15 @@ export default function AuthLayout({
                     : "Don't have an account?"}{" "}
 
                   <Link
-                    href={
-                      isRegister
-                        ? "/login"
-                        : "/register"
-                    }
+                    href={isRegister ? "/login" : "/register"}
                     className="font-semibold text-sky-300 transition hover:text-white"
                   >
-                    {isRegister
-                      ? "Login"
-                      : "Register"}
+                    {isRegister ? "Login" : "Register"}
                   </Link>
                 </p>
               </div>
 
-              {/* Header */}
+              {/* HEADER */}
               <div className="mb-5">
                 <h1 className="text-2xl font-bold tracking-tight text-white">
                   {isRegister
@@ -162,6 +162,7 @@ export default function AuthLayout({
 
             </div>
 
+            {/* FOOTER */}
             <p className="mt-4 text-center text-xs text-slate-500">
               © {new Date().getFullYear()} HomeServe. All rights reserved.
             </p>
@@ -188,7 +189,6 @@ function ServiceCard({
 }: ServiceCardProps) {
   return (
     <div className="rounded-xl border border-white/80 bg-white/70 p-4 shadow-sm backdrop-blur-md">
-
       <div
         className={`mb-2 flex h-9 w-9 items-center justify-center rounded-lg text-lg ${iconStyle}`}
       >
@@ -202,7 +202,6 @@ function ServiceCard({
       <p className="mt-1 text-xs leading-5 text-slate-600">
         {description}
       </p>
-
     </div>
   );
 }
