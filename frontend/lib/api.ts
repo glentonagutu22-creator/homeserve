@@ -1,3 +1,4 @@
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5001/api";
@@ -12,9 +13,7 @@ export async function apiRequest<T>(
       ...options,
       credentials: "include",
       headers: {
-        ...(options.body
-          ? { "Content-Type": "application/json" }
-          : {}),
+        "Content-Type": "application/json",
         ...options.headers,
       },
     }
