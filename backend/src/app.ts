@@ -25,6 +25,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://homeserve-frontend.onrender.com",
+  "https://homeservice-theta-drab.vercel.app/?utm_source=chatgpt.com"
 ];
 
 app.use(
