@@ -391,7 +391,7 @@ export default function DashboardPage() {
           <SectionHeading
             title="Explore Our Services"
             description="Professional services to make your home life easier."
-            href="/services/cleaning"
+            href="/services"
             linkText="Explore"
           />
 
@@ -399,7 +399,7 @@ export default function DashboardPage() {
 
             {/* CLEANING CARD */}
             <Link
-              href="/services/cleaning"
+              href="/services"
               className="group overflow-hidden border border-blue-100 bg-blue-50 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
             >
               <div className="relative h-28 overflow-hidden bg-blue-100 sm:h-44">
@@ -436,7 +436,7 @@ export default function DashboardPage() {
 
             {/* MOVING CARD */}
             <Link
-              href="/services/moving"
+              href="/services"
               className="group overflow-hidden border border-emerald-100 bg-emerald-50 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg"
             >
               <div className="relative h-28 overflow-hidden bg-emerald-100 sm:h-44">
@@ -473,7 +473,7 @@ export default function DashboardPage() {
 
             {/* ELECTRICAL CARD */}
             <Link
-              href="/services/electrical"
+              href="/services"
               className="group overflow-hidden border border-amber-100 bg-amber-50 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg"
             >
               <div className="relative h-28 overflow-hidden bg-amber-100 sm:h-44">
@@ -537,7 +537,7 @@ export default function DashboardPage() {
                 </p>
 
                 <Link
-                  href="/services/cleaning"
+                  href="/services"
                   className="mt-4 inline-flex items-center gap-2 bg-[#061F35] px-4 py-2 text-xs font-bold text-white hover:bg-blue-900"
                 >
                   Book a service <ArrowRight size={13} />
@@ -773,7 +773,7 @@ export default function DashboardPage() {
           </div>
 
           <Link
-            href="/services/cleaning"
+            href="/services"
             className="flex shrink-0 items-center gap-1 bg-sky-700 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-sky-800 sm:text-xs"
           >
             Book now <ArrowRight size={12} />
