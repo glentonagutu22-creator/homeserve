@@ -6,7 +6,7 @@ const categories = [
     description:
       "Professional cleaning services for homes and spaces of different sizes.",
     color: "blue",
-    href: "/services/cleaning",
+    href: "/services",
     pricing: "Calculated pricing",
     details: [
       "Pricing can depend on the selected cleaning service.",
@@ -19,7 +19,7 @@ const categories = [
     description:
       "Moving and relocation services for customers who need help transporting their belongings.",
     color: "green",
-    href: "/services/moving",
+    href: "/services",
     pricing: "Quote-based pricing",
     details: [
       "Moving requirements can vary significantly between customers.",
@@ -32,7 +32,7 @@ const categories = [
     description:
       "Professional electrical installation, maintenance and repair services.",
     color: "amber",
-    href: "/services/electrical",
+    href: "/services",
     pricing: "Instant or quote",
     details: [
       "Some electrical services have defined pricing.",
