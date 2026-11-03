@@ -18,8 +18,11 @@ export default function AuthLayout({
     <main className="min-h-screen bg-sky-100">
       <div className="grid min-h-screen lg:grid-cols-[1.15fr_0.85fr]">
 
-        {/* LEFT BRANDING */}
+        {/* =========================
+            LEFT BRANDING
+        ========================== */}
         <section className="relative hidden min-h-screen overflow-hidden lg:flex">
+
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
@@ -29,10 +32,12 @@ export default function AuthLayout({
           />
 
           <div className="absolute inset-0 bg-sky-50/45" />
+
           <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-sky-100/30" />
 
           <div className="relative z-10 flex w-full flex-col justify-between px-10 py-10 xl:px-16">
 
+            {/* Logo */}
             <div>
               <img
                 src="/images/homeserve-logo.webp"
@@ -41,7 +46,9 @@ export default function AuthLayout({
               />
             </div>
 
+            {/* Main branding */}
             <div className="max-w-xl">
+
               <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-600">
                 More Than Services
               </p>
@@ -49,6 +56,7 @@ export default function AuthLayout({
               <h2 className="text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 xl:text-6xl">
                 Your Home.
                 <br />
+
                 <span className="text-blue-600">
                   Our Expertise.
                 </span>
@@ -59,7 +67,9 @@ export default function AuthLayout({
                 electrical services at your convenience.
               </p>
 
+              {/* Services */}
               <div className="mt-7 grid max-w-2xl grid-cols-3 gap-3">
+
                 <ServiceCard
                   icon="✦"
                   title="Cleaning"
@@ -80,9 +90,11 @@ export default function AuthLayout({
                   description="Reliable electrical solutions"
                   iconStyle="bg-amber-100 text-amber-600"
                 />
+
               </div>
             </div>
 
+            {/* Trust indicators */}
             <div className="flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-700">
               <span>🛡 Trusted Professionals</span>
               <span>◷ On-Time Service</span>
@@ -92,22 +104,28 @@ export default function AuthLayout({
           </div>
         </section>
 
-        {/* RIGHT AUTH AREA */}
-        <section className="
-          flex min-h-screen
-          items-center justify-center
-          bg-sky-100
-          px-4 py-8
-          sm:px-8
-          lg:px-10
-        ">
+        {/* =========================
+            RIGHT AUTH AREA
+        ========================== */}
+        <section
+          className="
+            flex min-h-screen
+            items-center justify-center
+            bg-sky-100
+            px-4 py-6
+            sm:px-8 sm:py-8
+            lg:px-10
+          "
+        >
 
-          {/* Centered content wrapper */}
-          <div className="
-            flex w-full max-w-[390px]
-            flex-col items-center justify-center
-            my-auto
-          ">
+          {/* CENTERED AUTH CONTAINER */}
+          <div
+            className="
+              my-auto
+              flex w-full max-w-[390px]
+              flex-col items-center justify-center
+            "
+          >
 
             {/* MOBILE LOGO */}
             <div className="mb-5 flex w-full justify-center lg:hidden">
@@ -119,13 +137,16 @@ export default function AuthLayout({
             </div>
 
             {/* AUTH CARD */}
-            <div className="
-              w-full rounded-2xl
-              bg-[#082B49]
-              p-5
-              shadow-2xl shadow-blue-900/20
-              sm:p-7
-            ">
+            <div
+              className="
+                w-full min-w-0
+                rounded-2xl
+                bg-[#082B49]
+                p-5
+                shadow-2xl shadow-blue-900/20
+                sm:p-7
+              "
+            >
 
               {/* TOP NAVIGATION */}
               <div className="mb-5 flex justify-end">
@@ -158,6 +179,7 @@ export default function AuthLayout({
                 </p>
               </div>
 
+              {/* LOGIN OR REGISTER FORM */}
               {children}
 
             </div>
@@ -174,6 +196,10 @@ export default function AuthLayout({
   );
 }
 
+/* =========================
+   SERVICE CARD
+========================= */
+
 interface ServiceCardProps {
   icon: string;
   title: string;
@@ -189,6 +215,7 @@ function ServiceCard({
 }: ServiceCardProps) {
   return (
     <div className="rounded-xl border border-white/80 bg-white/70 p-4 shadow-sm backdrop-blur-md">
+
       <div
         className={`mb-2 flex h-9 w-9 items-center justify-center rounded-lg text-lg ${iconStyle}`}
       >
@@ -202,6 +229,7 @@ function ServiceCard({
       <p className="mt-1 text-xs leading-5 text-slate-600">
         {description}
       </p>
+
     </div>
   );
 }
