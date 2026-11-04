@@ -58,7 +58,13 @@ interface MessageResponse {
   success: boolean;
   message: string;
 }
-
+interface PublicContactSettingsResponse {
+  success: boolean;
+  settings: {
+    email: string;
+    phone: string;
+  };
+}
 // =========================================================
 // SYSTEM SETTINGS
 // =========================================================
@@ -73,7 +79,23 @@ export async function getSystemSettings(): Promise<
 
   return response.settings;
 }
+// =========================================================
+// PUBLIC CONTACT SETTINGS
+// =========================================================
 
+export interface PublicContactSettings {
+  email: string;
+  phone: string;
+}
+
+export async function getPublicContactSettings(): Promise<PublicContactSettings> {
+  const response =
+    await apiRequest<PublicContactSettingsResponse>(
+      "/settings/public/contact"
+    );
+
+  return response.settings;
+}
 export async function getSystemSettingsByCategory(
   category: string
 ): Promise<SystemSetting[]> {

@@ -22,6 +22,7 @@ import {
 
   changeMyPasswordController,
   deleteMyAccountController,
+  getPublicContactSettingsController,
 } from "./settings.controller";
 
 import {
@@ -146,6 +147,14 @@ router.patch(
   authorize(UserRole.ADMIN),
   validate(updateSettingsSchema),
   asyncHandler(updateSettingsController)
+);
+// =========================================================
+// PUBLIC CONTACT SETTINGS
+// =========================================================
+
+router.get(
+  "/public/contact",
+  asyncHandler(getPublicContactSettingsController)
 );
 
 export default router;

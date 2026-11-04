@@ -1,7 +1,13 @@
+
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+
 import {
   ArrowRight,
   CheckCircle2,
@@ -16,7 +22,9 @@ import {
   submitContactMessage,
 } from "@/lib/contact";
 
-const WHATSAPP_NUMBER = "254756685132";
+import {
+  getPublicContactSettings,
+} from "@/lib/settings";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -35,6 +43,46 @@ export default function ContactPage() {
 
   const [error, setError] =
     useState("");
+
+  // Public contact settings
+  const [contactSettings, setContactSettings] =
+    useState({
+      email: "",
+      phone: "",
+    });
+
+  const [contactSettingsLoading, setContactSettingsLoading] =
+    useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadContactSettings() {
+      try {
+        const settings =
+          await getPublicContactSettings();
+
+        if (isMounted) {
+          setContactSettings(settings);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load public contact settings:",
+          error
+        );
+      } finally {
+        if (isMounted) {
+          setContactSettingsLoading(false);
+        }
+      }
+    }
+
+    loadContactSettings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   function updateField(
     field: keyof typeof form,
@@ -86,12 +134,19 @@ export default function ContactPage() {
   }
 
   function openWhatsApp() {
+    const whatsappNumber =
+      contactSettings.phone.replace(/\D/g, "");
+
+    if (!whatsappNumber) {
+      return;
+    }
+
     const message = encodeURIComponent(
       "Hello HomeServe, I would like to get help with a service."
     );
 
     window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
+      `https://wa.me/${whatsappNumber}?text=${message}`,
       "_blank",
       "noopener,noreferrer"
     );
@@ -407,10 +462,17 @@ export default function ContactPage() {
                     </p>
 
                     <a
-                      href="mailto:support@homeserve.co.ke"
+                      href={
+                        contactSettings.email
+                          ? `mailto:${contactSettings.email}`
+                          : undefined
+                      }
                       className="mt-1 block text-sm text-slate-500 hover:text-[#061F35]"
                     >
-                      support@homeserve.co.ke
+                      {contactSettingsLoading
+                        ? "Loading..."
+                        : contactSettings.email ||
+                          "Currently unavailable"}
                     </a>
                   </div>
                 </div>
@@ -425,9 +487,19 @@ export default function ContactPage() {
                       Phone
                     </p>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Customer support
-                    </p>
+                    <a
+                      href={
+                        contactSettings.phone
+                          ? `tel:${contactSettings.phone}`
+                          : undefined
+                      }
+                      className="mt-1 block text-sm text-slate-500 hover:text-[#061F35]"
+                    >
+                      {contactSettingsLoading
+                        ? "Loading..."
+                        : contactSettings.phone ||
+                          "Currently unavailable"}
+                    </a>
                   </div>
                 </div>
 
@@ -467,7 +539,11 @@ export default function ContactPage() {
               <button
                 type="button"
                 onClick={openWhatsApp}
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[#061F35] transition hover:bg-slate-100"
+                disabled={
+                  contactSettingsLoading ||
+                  !contactSettings.phone
+                }
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[#061F35] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Open WhatsApp
                 <ArrowRight size={17} />

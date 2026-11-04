@@ -15,7 +15,39 @@ export async function getAllSettings() {
     ],
   });
 }
+// =========================================================
+// PUBLIC CONTACT SETTINGS
+// =========================================================
 
+export async function getPublicContactSettings() {
+  const settings =
+    await prisma.systemSetting.findMany({
+      where: {
+        key: {
+          in: [
+            "business.email",
+            "business.phone",
+          ],
+        },
+      },
+      select: {
+        key: true,
+        value: true,
+      },
+    });
+
+  const settingsMap = Object.fromEntries(
+    settings.map((setting) => [
+      setting.key,
+      setting.value,
+    ])
+  );
+
+  return {
+    email: settingsMap["business.email"] || "",
+    phone: settingsMap["business.phone"] || "",
+  };
+}
 export async function getSettingsByCategory(
   category: string
 ) {

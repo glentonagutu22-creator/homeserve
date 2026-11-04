@@ -12,6 +12,7 @@ import {
   updateUserProfile,
   changePassword,
   deleteUserAccount,
+  getPublicContactSettings,
 } from "./settings.service";
 
 // =========================================================
@@ -209,5 +210,18 @@ export async function deleteMyAccountController(
     success: true,
     message:
       "Account deleted successfully",
+  });
+}
+
+export async function getPublicContactSettingsController(
+  _req: Request,
+  res: Response
+) {
+  const settings =
+    await getPublicContactSettings();
+
+  return res.status(200).json({
+    success: true,
+    settings,
   });
 }
